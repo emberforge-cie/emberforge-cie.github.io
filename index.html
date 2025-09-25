@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmberForge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .text-gradient {
+            background-image: linear-gradient(to right, #ef4444, #f97316);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 antialiased">
+
+    <!-- Navbar -->
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-3xl font-bold text-gray-900">
+                Ember<span class="text-orange-500">Forge</span>
+            </a>
+            <div class="hidden md:flex space-x-6 text-gray-600 font-medium">
+                <a href="#services" class="hover:text-orange-500 transition-colors duration-300">Services</a>
+                <a href="#demarche" class="hover:text-orange-500 transition-colors duration-300">Notre Démarche</a>
+                <a href="#contact" class="hover:text-orange-500 transition-colors duration-300">Contact</a>
+            </div>
+            <a href="#" id="download-brochure" class="bg-orange-500 text-white font-semibold py-2 px-4 rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+                Télécharger la plaquette
+            </a>
+        </nav>
+    </header>
+
+    <!-- Modal pour la plaquette -->
+    <div id="brochure-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full mx-4 text-center">
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">Plaquette des forfaits</h3>
+            <p class="text-gray-600 mb-6">La plaquette est en cours de préparation. Elle sera bientôt disponible au téléchargement !</p>
+            <button id="close-brochure-modal" class="bg-orange-500 text-white font-semibold py-2 px-6 rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300">Fermer</button>
+        </div>
+    </div>
+    
+    <!-- Modal pour le formulaire de contact -->
+    <div id="contact-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Demande de devis</h3>
+                <button id="close-contact-modal" class="text-gray-400 hover:text-gray-600 transition-colors duration-300">&times;</button>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-xl mb-6 text-sm text-gray-700">
+                <p><strong>SIRET :</strong> 123 456 789 00012</p>
+                <p><strong>Email :</strong> contact@emberforge.fr</p>
+                <p><strong>Téléphone :</strong> +33 1 23 45 67 89</p>
+            </div>
+            <form action="mailto:contact@emberforge.fr" method="post" enctype="text/plain">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <input type="text" name="prénom" placeholder="Prénom" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                    <input type="text" name="nom" placeholder="Nom" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" name="entreprise" placeholder="Nom de l'entreprise (facultatif)" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div class="mb-4">
+                    <input type="email" name="email" placeholder="Adresse email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                </div>
+                <div class="mb-4">
+                    <input type="tel" name="téléphone" id="phone-number" placeholder="Numéro de téléphone (+33...)" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div class="mb-6">
+                    <textarea name="message" rows="5" placeholder="Votre message" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required></textarea>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="bg-orange-500 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300 ease-in-out transform hover:scale-105">
+                        Envoyer ma demande
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <main class="py-12">
+
+        <!-- Hero Section -->
+        <section class="container mx-auto px-6 py-24 text-center">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight mb-4 text-gray-900">
+                Votre partenaire pour le <span class="text-gradient">développement</span> et le <span class="text-gradient">design</span>
+            </h1>
+            <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                Chez EmberForge, nous transformons vos idées en solutions numériques performantes et sur mesure, pour les professionnels et les particuliers.
+            </p>
+            <button id="open-contact-modal-hero" class="bg-orange-500 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-orange-600 transition-all duration-300 ease-in-out transform hover:scale-105">
+                Demander un devis
+            </button>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="container mx-auto px-6 py-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 text-gray-800">Nos Services</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- Site Web Card -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl transition-transform transform hover:scale-105 duration-300">
+                    <div class="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-6">
+                        <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Développement Web</h3>
+                    <p class="text-gray-600 mb-4">
+                        Nous créons des sites web professionnels, de la simple vitrine à la boutique en ligne complexe.
+                    </p>
+                    <ul class="text-gray-500 list-disc list-inside space-y-2">
+                        <li>Sites de présentation</li>
+                        <li>Showroom en ligne</li>
+                        <li>Boutiques e-commerce</li>
+                        <li>... et bien plus encore</li>
+                    </ul>
+                </div>
+
+                <!-- Application Web Card -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl transition-transform transform hover:scale-105 duration-300">
+                    <div class="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
+                        <svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 11V9a1 1 0 012 0v2a1 1 0 01-2 0zm1-7a6 6 0 110 12A6 6 0 0110 4z"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Applications Web</h3>
+                    <p class="text-gray-600 mb-4">
+                        Des outils sur mesure pour optimiser vos processus et améliorer votre productivité.
+                    </p>
+                    <ul class="text-gray-500 list-disc list-inside space-y-2">
+                        <li>Outil de facturation</li>
+                        <li>Agenda et prise de rendez-vous</li>
+                        <li>Planning d'équipe</li>
+                        <li>Chat de société sécurisé</li>
+                        <li>... et bien plus encore</li>
+                    </ul>
+                </div>
+
+                <!-- Application Desktop Card -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl transition-transform transform hover:scale-105 duration-300">
+                    <div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
+                        <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm12 5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1v-2z"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Applications Desktop</h3>
+                    <p class="text-gray-600 mb-4">
+                        Des logiciels puissants pour automatiser et simplifier vos tâches quotidiennes.
+                    </p>
+                    <ul class="text-gray-500 list-disc list-inside space-y-2">
+                        <li>Automatisation de processus</li>
+                        <li>Outil de facturation</li>
+                        <li>Agenda et prise de rendez-vous</li>
+                        <li>Planning d'équipe</li>
+                        <li>Chat de société sécurisé</li>
+                        <li>... et bien plus encore</li>
+                    </ul>
+                </div>
+
+                <!-- Outils Personnalisés Card -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl transition-transform transform hover:scale-105 duration-300">
+                    <div class="flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-6">
+                        <svg class="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 11a1 1 0 112 0v2a1 1 0 11-2 0v-2zm-1 2a1 1 0 10-2 0v2a1 1 0 102 0v-2zM12 9a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1V9z"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Outils Personnalisés</h3>
+                    <p class="text-gray-600 mb-4">
+                        Nous concevons des outils uniques, adaptés spécifiquement à vos besoins.
+                    </p>
+                    <ul class="text-gray-500 list-disc list-inside space-y-2">
+                        <li>Adresse mail dédiée</li>
+                        <li>Nom de domaine</li>
+                        <li>Applications à affichage dynamique</li>
+                        <li>... et plus encore</li>
+                    </ul>
+                </div>
+                
+                <!-- Design Card -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl transition-transform transform hover:scale-105 duration-300">
+                    <div class="flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-6">
+                        <svg class="w-8 h-8 text-purple-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 11a1 1 0 112 0v2a1 1 0 11-2 0v-2zm1-7a6 6 0 110 12A6 6 0 0110 4z"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Design</h3>
+                    <p class="text-gray-600 mb-4">
+                        Une image de marque forte et cohérente, du numérique au papier.
+                    </p>
+                    <ul class="text-gray-500 list-disc list-inside space-y-2">
+                        <li>Affiches et flyers</li>
+                        <li>Enseignes et signalétique</li>
+                        <li>Cartes de visite</li>
+                        <li>Documents personnalisés</li>
+                        <li>... et plus encore</li>
+                    </ul>
+                </div>
+                
+                <!-- Pricing Card -->
+                <div class="bg-orange-500 p-8 rounded-2xl shadow-xl text-white flex flex-col justify-center items-center text-center">
+                    <h3 class="text-3xl font-bold mb-4">Prix sur devis</h3>
+                    <p class="text-lg mb-6">
+                        Chaque projet est unique. Nous vous fournirons une estimation détaillée et transparente, parfaitement adaptée à vos besoins.
+                    </p>
+                    <button id="open-contact-modal-pricing" class="bg-white text-orange-500 font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition-colors duration-300">
+                        Demander un devis
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Our Approach Section -->
+        <section id="demarche" class="container mx-auto px-6 py-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 text-gray-800">Notre Démarche</h2>
+            <div class="bg-white p-8 md:p-12 rounded-2xl shadow-xl flex flex-col md:flex-row items-center space-y-8 md:space-y-0 md:space-x-12">
+                <div class="flex-1">
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Des solutions conçues pour vous</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Toutes les solutions que nous proposons sont conçues pour être utilisées facilement par le client et répondre précisément à ses besoins. Notre objectif est de simplifier votre quotidien et d'améliorer votre productivité grâce à des outils personnalisés, intuitifs et performants. Nous vous accompagnons à chaque étape pour garantir le succès de votre projet.
+                    </p>
+                </div>
+                <div class="md:w-1/3">
+                    <img src="https://placehold.co/400x300/a855f7/ffffff?text=Productivit%C3%A9" alt="Productivité améliorée" class="rounded-xl shadow-lg w-full">
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="container mx-auto px-6 py-12 text-center">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-4 text-gray-800">Prêt à démarrer votre projet ?</h2>
+            <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+                Contactez-nous dès aujourd'hui pour obtenir une consultation gratuite et un devis personnalisé.
+            </p>
+            <button id="open-contact-modal-footer" class="bg-gray-800 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-105">
+                Nous contacter
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-12">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2024 EmberForge. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const downloadButton = document.getElementById('download-brochure');
+            const brochureModal = document.getElementById('brochure-modal');
+            const closeBrochureModalButton = document.getElementById('close-brochure-modal');
+
+            const openContactModalHeroButton = document.getElementById('open-contact-modal-hero');
+            const openContactModalPricingButton = document.getElementById('open-contact-modal-pricing');
+            const openContactModalFooterButton = document.getElementById('open-contact-modal-footer');
+            const contactModal = document.getElementById('contact-modal');
+            const closeContactModalButton = document.getElementById('close-contact-modal');
+            const phoneNumberInput = document.getElementById('phone-number');
+
+            // Set default value for phone number input
+            phoneNumberInput.value = '+33 ';
+
+            // Brochure modal logic
+            downloadButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                brochureModal.classList.remove('hidden');
+                brochureModal.classList.add('flex');
+            });
+
+            closeBrochureModalButton.addEventListener('click', () => {
+                brochureModal.classList.add('hidden');
+                brochureModal.classList.remove('flex');
+            });
+
+            brochureModal.addEventListener('click', (event) => {
+                if (event.target === brochureModal) {
+                    brochureModal.classList.add('hidden');
+                    brochureModal.classList.remove('flex');
+                }
+            });
+
+            // Contact modal logic
+            const openContactModals = [openContactModalHeroButton, openContactModalPricingButton, openContactModalFooterButton];
+            openContactModals.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    contactModal.classList.remove('hidden');
+                    contactModal.classList.add('flex');
+                });
+            });
+
+            closeContactModalButton.addEventListener('click', () => {
+                contactModal.classList.add('hidden');
+                contactModal.classList.remove('flex');
+            });
+
+            contactModal.addEventListener('click', (event) => {
+                if (event.target === contactModal) {
+                    contactModal.classList.add('hidden');
+                    contactModal.classList.remove('flex');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
