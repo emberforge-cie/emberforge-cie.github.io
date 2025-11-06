@@ -3,305 +3,680 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EmberForge</title>
+    <title>EmberForge | Solutions Digitales d'Avant-Garde</title>
+    <!-- Chargement de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Définition des couleurs personnalisées Tailwind */
+        :root {
+            --color-primary: #314160; /* Nouveau Bleu Marine */
+            --color-secondary: #F97316; /* Orange Vif (Accent) */
+            --color-light-bg: #FFFFFF; /* Fond très clair (Blanc) */
+            --color-dark-text: #1F2937; /* Texte principal foncé (Gris très foncé) */
+        }
+        
+        /* Classes adaptées au fond clair */
+        .bg-light-bg { background-color: var(--color-light-bg); }
+        .bg-primary { background-color: var(--color-primary); }
+        .text-primary { color: var(--color-primary); }
+        .text-secondary { color: var(--color-secondary); }
+        .border-secondary { border-color: var(--color-secondary); }
+
+        /* --- EFFETS VISUELS GLOBALES --- */
+
+        /* Particules Canvas Container pour le Hero */
+        .particle-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0; 
+        }
+        #particleCanvas {
+            display: block;
+            opacity: 0.15; /* Opacité faible pour la subtilité */
+        }
+
+        /* Canvas pour les particules dans la barre de navigation */
+        #navParticleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Sous le contenu de la navigation (z-index: 20) */
+            opacity: 0.1; /* Très subtil */
+            pointer-events: none; /* Crucial pour cliquer les liens */
+        }
+
+        /* Dégradé de fond subtil pour le Hero Section - UTILISE LES NOUVELLES COULEURS */
+        .hero-bg-gradient {
+            background-image: radial-gradient(at 10% 80%, rgba(49, 65, 96, 0.08), transparent 50%), /* Nouveau Bleu */
+                              radial-gradient(at 90% 10%, rgba(249, 115, 22, 0.1), transparent 50%); /* Nouvel Orange */
+        }
+
+        /* Style pour les cartes (effet d'élévation prononcé) */
+        .card-light {
+            transition: transform 0.4s ease-out, box-shadow 0.4s ease-out, border-color 0.4s;
+            background-color: white;
+            border: 1px solid #EEEEEE;
+        }
+        .card-light:hover {
+            transform: translateY(-8px); /* Soulèvement plus important */
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.15); /* Ombre plus marquée */
+            border-color: var(--color-secondary);
+        }
+
+        /* Dégradé et Effets pour le Bouton Principal (CTA) - UTILISE LES NOUVELLES COULEURS */
+        .btn-gradient {
+            background-image: linear-gradient(to right, var(--color-secondary), #FFAC60); /* Orange Vif vers Orange plus Clair */
+            transition: transform 0.3s, box-shadow 0.3s, filter 0.3s;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4); /* Ombre initiale plus forte */
+        }
+        .btn-gradient:hover {
+            transform: scale(1.02); /* Léger grossissement pour le pop visuel */
+            box-shadow: 0 15px 35px rgba(249, 115, 22, 0.6); /* Effet de "glow" survolé */
+            filter: brightness(1.1);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
+            background-color: var(--color-light-bg);
+            color: var(--color-dark-text);
         }
-        .text-gradient {
-            background-image: linear-gradient(to right, #ef4444, #f97316);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+
+        /* Style pour les icônes (64x64px) */
+        .icon-lg {
+            width: 64px; /* Taille Fixe: 64px */
+            height: 64px; /* Taille Fixe: 64px */
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8; /* Épaisseur de trait propre et moderne */
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Style pour la Modale (Pop-up) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100; /* Assure que la modale est au-dessus de tout */
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#314160', /* Nouveau Bleu Marine */
+                        'secondary': '#F97316', /* Orange Vif */
+                        'light-bg': '#FFFFFF',
+                        'dark-text': '#1F2937',
+                    }
+                }
+            }
+        }
+
+        // --- ICON FALLBACK LOGIC ---
+        // Carte des SVGs de secours (Fallback SVGs)
+        const fallbackSvgs = {
+            // Mise à jour de la couleur du trait secondaire (Primary) dans les SVGs
+            'code': `<svg class="icon-lg mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-secondary);"><path d="M16 18l6-6-6-6" /><path d="M8 6L2 12l6 6" /><path d="M11 4l2 16" style="stroke: var(--color-primary);" /></svg>`,
+            'design': `<svg class="icon-lg mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-secondary);"><path d="M12 20V10" /><path d="M18.4 7.6a2 2 0 113.8 1.8L8.6 22H2v-6.6L18.4 7.6z" /><path d="M15 4V2" style="stroke: var(--color-primary);" /><path d="M17 11H9" style="stroke: var(--color-primary);" /></svg>`,
+            'trending': `<svg class="icon-lg mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-secondary);"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="18 7 22 7 22 11" style="stroke: var(--color-primary);" /></svg>`,
+            'settings': `<svg class="icon-lg mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-secondary);"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.75 1.3a2 2 0 00.73 2.73l.15.08a2 2 0 011 1.74v.44a2 2 0 01-1 1.74l-.15.08a2 2 0 00-.73 2.73l.75 1.3a2 2 0 002.73.73l.15-.08a2 2 0 011-1.74v-.18a2 2 0 002-2.18c0-.36.06-.71.22-1.04a2 2 0 011.73-1l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.75-1.3a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.44a2 2 0 011-1.74l.15-.08a2 2 0 00.73-2.73l-.75-1.3a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-1 1.74V4a2 2 0 00-2-2z" /><circle cx="12" cy="12" r="3" style="stroke: var(--color-primary);" /></svg>`,
+            'lightbulb': `<svg class="icon-lg mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-secondary);"><path d="M15 14c.2-1 .9-1.9 2.7-2.9C21 8 21 6 21 4a2 2 0 00-2-2H5a2 2 0 00-2 2c0 2 0 4 3.3 6.9 1.8 1 2.5 1.9 2.7 2.9" /><path d="M12 16c-3 0-5 2-5 5v1h10v-1c0-3-2-5-5-5z" style="stroke: var(--color-primary);" /></svg>`,
+            'handshake': `<svg class="icon-lg mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-secondary);"><path d="M15 17L20 12l-5-5" /><path d="M4 17l5-5-5-5" /><path d="M22 12H2" style="stroke: var(--color-primary);" /></svg>`,
+        };
+
+        // Fonction globale appelée par l'attribut onerror
+        function fallbackToSvg(element, iconType) {
+            const svgHtml = fallbackSvgs[iconType];
+            if (svgHtml) {
+                // Remplacer le contenu du div parent par le SVG de secours
+                element.parentElement.innerHTML = svgHtml;
+            }
+        }
+
+        // --- PARTICLE EFFECT LOGIC (HERO SECTION) ---
+        let heroParticles = [];
+        const heroParticleCount = 50;
+        const heroMaxDistance = 100;
+
+        function initHeroParticles(canvas, ctx) {
+            heroParticles = [];
+            for (let i = 0; i < heroParticleCount; i++) {
+                // Utilisation du nouveau Primary Blue pour les particules
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                // Nouveau Bleu : #314160
+                heroParticles.push(new Particle(x, y, 0.5, 0.5, 'rgba(49, 65, 96, 0.5)')); 
+            }
+        }
+
+        function animateHeroParticles(canvas, ctx) {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            let opacityValue = 1;
+            for (let a = 0; a < heroParticles.length; a++) {
+                for (let b = a; b < heroParticles.length; b++) {
+                    const dist = Math.hypot(heroParticles[a].x - heroParticles[b].x, heroParticles[a].y - heroParticles[b].y);
+                    
+                    if (dist < heroMaxDistance) {
+                        opacityValue = 1 - (dist / heroMaxDistance);
+                        // Utilisation du nouvel Orange Vif pour les lignes de connexion
+                        ctx.strokeStyle = `rgba(249, 115, 22, ${opacityValue * 0.5})`; 
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(heroParticles[a].x, heroParticles[a].y);
+                        ctx.lineTo(heroParticles[b].x, heroParticles[b].y);
+                        ctx.stroke();
+                    }
+                }
+                heroParticles[a].update(canvas);
+                heroParticles[a].draw(ctx);
+            }
+            requestAnimationFrame(() => animateHeroParticles(canvas, ctx));
+        }
+
+        // --- PARTICLE EFFECT LOGIC (NAV BAR - CINDERS) ---
+        let navParticles = [];
+        const navParticleCount = 20;
+
+        class Particle {
+            constructor(x, y, speedX, speedY, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * speedX;
+                this.speedY = (Math.random() - 0.5) * speedY;
+                this.color = color;
+            }
+
+            update(canvas) {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        class Cinder {
+            constructor(canvas) {
+                this.reset(canvas);
+            }
+
+            reset(canvas) {
+                this.x = canvas.width; // Start on the right
+                this.y = Math.random() * canvas.height;
+                this.radius = Math.random() * 1.5 + 0.5;
+                this.speedX = -(Math.random() * 0.8 + 0.2); // Move Left
+                this.speedY = (Math.random() - 0.5) * 0.1; 
+                // Utilisation du nouvel Orange Vif pour les cendres
+                this.color = 'rgba(249, 115, 22, 0.7)'; 
+            }
+
+            update(canvas) {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Respawn on the right if it goes off the left edge
+                if (this.x < 0) this.reset(canvas);
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function initNavParticles() {
+            const canvas = document.getElementById('navParticleCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            function resizeNavCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            }
+
+            navParticles = [];
+            for (let i = 0; i < navParticleCount; i++) {
+                navParticles.push(new Cinder(canvas));
+            }
+
+            function animateNavParticles() {
+                resizeNavCanvas();
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                for (let i = 0; i < navParticles.length; i++) {
+                    navParticles[i].update(canvas);
+                    navParticles[i].draw(ctx);
+                }
+                requestAnimationFrame(animateNavParticles);
+            }
+
+            resizeNavCanvas();
+            animateNavParticles();
+
+            window.addEventListener('resize', resizeNavCanvas);
+        }
+
+        // --- LOGIQUE DE LA MODALE ADMIN ---
+        const ADMIN_PASSWORD = "emberforge1234";
+        const REDIRECT_URL = "https://emberforge.fr/private/app.html";
+
+        function showAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+            // Optionnel : Focus sur le champ de mot de passe à l'ouverture
+            setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100); 
+        }
+
+        function hideAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+            document.getElementById('adminPasswordInput').value = ''; // Réinitialiser l'input
+            document.getElementById('loginFeedback').textContent = ''; // Réinitialiser le message de feedback
+        }
+
+        function handleAdminLogin(event) {
+            // Empêche la soumission du formulaire classique
+            event.preventDefault(); 
+            
+            const passwordInput = document.getElementById('adminPasswordInput');
+            const feedbackElement = document.getElementById('loginFeedback');
+            const enteredPassword = passwordInput.value;
+
+            if (enteredPassword === ADMIN_PASSWORD) {
+                feedbackElement.textContent = "Authentification réussie ! Redirection en cours...";
+                feedbackElement.classList.remove('text-red-500');
+                feedbackElement.classList.add('text-green-500');
+                
+                // Redirection
+                window.location.href = REDIRECT_URL;
+
+            } else {
+                feedbackElement.textContent = "Mot de passe incorrect. Veuillez réessayer.";
+                feedbackElement.classList.remove('text-green-500');
+                feedbackElement.classList.add('text-red-500');
+                passwordInput.value = ''; // Effacer le mot de passe incorrect
+                passwordInput.focus();
+            }
+        }
+
+        
+        // --- INITIALISATION GLOBALE ---
+        window.onload = function() {
+            // Initialisation des particules HERO
+            const heroCanvas = document.getElementById('particleCanvas');
+            if (heroCanvas) {
+                const heroCtx = heroCanvas.getContext('2d');
+                initHeroParticles(heroCanvas, heroCtx);
+                animateHeroParticles(heroCanvas, heroCtx);
+                window.addEventListener('resize', () => { initHeroParticles(heroCanvas, heroCtx); });
+            }
+
+            // Initialisation des particules NAV
+            initNavParticles();
+            
+            // Écouteur pour la soumission du formulaire
+            document.getElementById('adminLoginForm').addEventListener('submit', handleAdminLogin);
+            
+            // Écouteur pour masquer la modale si l'utilisateur clique en dehors
+            document.getElementById('adminModal').addEventListener('click', (e) => {
+                if (e.target.id === 'adminModal') {
+                    hideAdminModal();
+                }
+            });
+        };
+    </script>
 </head>
-<body class="bg-gray-100 antialiased">
+<body class="bg-light-bg text-dark-text min-h-screen">
 
-    <!-- Navbar -->
-    <header class="bg-white shadow-md">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-3xl font-bold text-gray-900">
-                Ember<span class="text-orange-500">Forge</span>
-            </a>
-            <div class="hidden md:flex space-x-6 text-gray-600 font-medium">
-                <a href="#services" class="hover:text-orange-500 transition-colors duration-300">Services</a>
-                <a href="#demarche" class="hover:text-orange-500 transition-colors duration-300">Notre Démarche</a>
-                <a href="#contact" class="hover:text-orange-500 transition-colors duration-300">Contact</a>
+    <!-- Modale d'Accès Administrateur (Initialement cachée) -->
+    <div id="adminModal" class="modal-overlay hidden transition duration-300">
+        <div class="bg-white rounded-xl p-8 max-w-sm w-full shadow-2xl border-t-4 border-secondary transform scale-100 transition-all duration-300" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="flex justify-between items-start mb-4">
+                <h3 id="modalTitle" class="text-2xl font-bold text-primary">Accès Administrateur</h3>
+                <button onclick="hideAdminModal()" class="text-gray-500 hover:text-red-500 transition duration-150 p-1 rounded-full">
+                    <!-- Icône X -->
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <a href="#" id="download-brochure" class="bg-orange-500 text-white font-semibold py-2 px-4 rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300 ease-in-out transform hover:-translate-y-1">
-                Télécharger la plaquette
-            </a>
-        </nav>
-    </header>
+            
+            <form id="adminLoginForm">
+                <p class="text-sm text-gray-600 mb-4">Veuillez entrer le mot de passe pour accéder à la zone privée.</p>
+                <input 
+                    type="password" 
+                    id="adminPasswordInput" 
+                    placeholder="Mot de passe" 
+                    required 
+                    class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary transition duration-150 text-dark-text"
+                >
+                
+                <p id="loginFeedback" class="text-center font-medium mb-4 h-5"></p>
 
-    <!-- Modal pour la plaquette -->
-    <div id="brochure-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center z-50">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full mx-4 text-center">
-            <h3 class="text-2xl font-bold mb-4 text-gray-800">Plaquette des forfaits</h3>
-            <p class="text-gray-600 mb-6">La plaquette est en cours de préparation. Elle sera bientôt disponible au téléchargement !</p>
-            <button id="close-brochure-modal" class="bg-orange-500 text-white font-semibold py-2 px-6 rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300">Fermer</button>
-        </div>
-    </div>
-    
-    <!-- Modal pour le formulaire de contact -->
-    <div id="contact-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center z-50">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full mx-4">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-800">Demande de devis</h3>
-                <button id="close-contact-modal" class="text-gray-400 hover:text-gray-600 transition-colors duration-300">&times;</button>
-            </div>
-            <div class="bg-gray-50 p-4 rounded-xl mb-6 text-sm text-gray-700">
-                <p><strong>SIRET :</strong>991 841 057 00011</p>
-                <p><strong>Email :</strong> contact@emberforge.fr</p>
-                <p><strong>Téléphone :</strong> +33 7 65 87 83 87</p>
-            </div>
-            <form action="mailto:contact@emberforge.fr" method="post" enctype="text/plain">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <input type="text" name="prénom" placeholder="Prénom" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-                    <input type="text" name="nom" placeholder="Nom" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-                </div>
-                <div class="mb-4">
-                    <input type="text" name="entreprise" placeholder="Nom de l'entreprise (facultatif)" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-                </div>
-                <div class="mb-4">
-                    <input type="email" name="email" placeholder="Adresse email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-                </div>
-                <div class="mb-4">
-                    <input type="tel" name="téléphone" id="phone-number" placeholder="Numéro de téléphone (+33...)" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-                </div>
-                <div class="mb-6">
-                    <textarea name="message" rows="5" placeholder="Votre message" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required></textarea>
-                </div>
-                <div class="text-center">
-                    <button type="submit" class="bg-orange-500 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300 ease-in-out transform hover:scale-105">
-                        Envoyer ma demande
-                    </button>
-                </div>
+                <button 
+                    type="submit" 
+                    class="btn-gradient w-full py-3 text-lg font-bold text-white rounded-lg shadow-md hover:shadow-xl"
+                >
+                    Connexion
+                </button>
             </form>
         </div>
     </div>
+    
+    <!-- En-tête (Navigation) -->
+    <header class="sticky top-0 z-50 bg-white bg-opacity-95 backdrop-blur-sm shadow-xl relative">
+        <!-- Canvas pour les particules "Cendres" dans la nav bar -->
+        <canvas id="navParticleCanvas"></canvas>
 
-    <main class="py-12">
-
-        <!-- Hero Section -->
-        <section class="container mx-auto px-6 py-24 text-center">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight mb-4 text-gray-900">
-                Votre partenaire pour le <span class="text-gradient">développement</span> et le <span class="text-gradient">design</span>
-            </h1>
-            <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-                Chez EmberForge, nous transformons vos idées en solutions numériques performantes et sur mesure, pour les professionnels et les particuliers.
-            </p>
-            <button id="open-contact-modal-hero" class="bg-orange-500 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-orange-600 transition-all duration-300 ease-in-out transform hover:scale-105">
-                Demander un devis
-            </button>
-        </section>
-
-        <!-- Services Section -->
-        <section id="services" class="container mx-auto px-6 py-12">
-            <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 text-gray-800">Nos Services</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-                <!-- Site Web Card -->
-                <div class="bg-white p-8 rounded-2xl shadow-xl transition-transform transform hover:scale-105 duration-300">
-                    <div class="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-6">
-                        <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"/></svg>
-                    </div>
-                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Développement Web</h3>
-                    <p class="text-gray-600 mb-4">
-                        Nous créons des sites web professionnels, de la simple vitrine à la boutique en ligne complexe.
-                    </p>
-                    <ul class="text-gray-500 list-disc list-inside space-y-2">
-                        <li>Sites de présentation</li>
-                        <li>Showroom en ligne</li>
-                        <li>Boutiques e-commerce</li>
-                        <li>... et bien plus encore</li>
-                    </ul>
-                </div>
-
-                <!-- Application Web Card -->
-                <div class="bg-white p-8 rounded-2xl shadow-xl transition-transform transform hover:scale-105 duration-300">
-                    <div class="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
-                        <svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 11V9a1 1 0 012 0v2a1 1 0 01-2 0zm1-7a6 6 0 110 12A6 6 0 0110 4z"/></svg>
-                    </div>
-                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Applications Web</h3>
-                    <p class="text-gray-600 mb-4">
-                        Des outils sur mesure pour optimiser vos processus et améliorer votre productivité.
-                    </p>
-                    <ul class="text-gray-500 list-disc list-inside space-y-2">
-                        <li>Outil de facturation</li>
-                        <li>Agenda et prise de rendez-vous</li>
-                        <li>Planning d'équipe</li>
-                        <li>Chat de société sécurisé</li>
-                        <li>... et bien plus encore</li>
-                    </ul>
-                </div>
-
-                <!-- Application Desktop Card -->
-                <div class="bg-white p-8 rounded-2xl shadow-xl transition-transform transform hover:scale-105 duration-300">
-                    <div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
-                        <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm12 5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1v-2z"/></svg>
-                    </div>
-                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Applications Desktop</h3>
-                    <p class="text-gray-600 mb-4">
-                        Des logiciels puissants pour automatiser et simplifier vos tâches quotidiennes.
-                    </p>
-                    <ul class="text-gray-500 list-disc list-inside space-y-2">
-                        <li>Automatisation de processus</li>
-                        <li>Outil de facturation</li>
-                        <li>Agenda et prise de rendez-vous</li>
-                        <li>Planning d'équipe</li>
-                        <li>Chat de société sécurisé</li>
-                        <li>... et bien plus encore</li>
-                    </ul>
-                </div>
-
-                <!-- Outils Personnalisés Card -->
-                <div class="bg-white p-8 rounded-2xl shadow-xl transition-transform transform hover:scale-105 duration-300">
-                    <div class="flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-6">
-                        <svg class="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 11a1 1 0 112 0v2a1 1 0 11-2 0v-2zm-1 2a1 1 0 10-2 0v2a1 1 0 102 0v-2zM12 9a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1V9z"/></svg>
-                    </div>
-                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Outils Personnalisés</h3>
-                    <p class="text-gray-600 mb-4">
-                        Nous concevons des outils uniques, adaptés spécifiquement à vos besoins.
-                    </p>
-                    <ul class="text-gray-500 list-disc list-inside space-y-2">
-                        <li>Adresse mail dédiée</li>
-                        <li>Nom de domaine</li>
-                        <li>Applications à affichage dynamique</li>
-                        <li>... et plus encore</li>
-                    </ul>
-                </div>
-                
-                <!-- Design Card -->
-                <div class="bg-white p-8 rounded-2xl shadow-xl transition-transform transform hover:scale-105 duration-300">
-                    <div class="flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-6">
-                        <svg class="w-8 h-8 text-purple-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 11a1 1 0 112 0v2a1 1 0 11-2 0v-2zm1-7a6 6 0 110 12A6 6 0 0110 4z"/></svg>
-                    </div>
-                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Design</h3>
-                    <p class="text-gray-600 mb-4">
-                        Une image de marque forte et cohérente, du numérique au papier.
-                    </p>
-                    <ul class="text-gray-500 list-disc list-inside space-y-2">
-                        <li>Affiches et flyers</li>
-                        <li>Enseignes et signalétique</li>
-                        <li>Cartes de visite</li>
-                        <li>Documents personnalisés</li>
-                        <li>... et plus encore</li>
-                    </ul>
-                </div>
-                
-                <!-- Pricing Card -->
-                <div class="bg-orange-500 p-8 rounded-2xl shadow-xl text-white flex flex-col justify-center items-center text-center">
-                    <h3 class="text-3xl font-bold mb-4">Prix sur devis</h3>
-                    <p class="text-lg mb-6">
-                        Chaque projet est unique. Nous vous fournirons une estimation détaillée et transparente, parfaitement adaptée à vos besoins.
-                    </p>
-                    <button id="open-contact-modal-pricing" class="bg-white text-orange-500 font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition-colors duration-300">
-                        Demander un devis
-                    </button>
-                </div>
-
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center relative z-20">
+            <!-- Logo EmberForge avec Dégradé -->
+            <a href="#" class="text-3xl font-extrabold tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary transition duration-300 hover:opacity-80">EmberForge</a>
+            <div class="hidden md:flex space-x-8 text-sm font-medium">
+                <a href="#services" class="text-dark-text hover:text-secondary transition duration-200 hover:scale-105">Services</a>
+                <a href="#about" class="text-dark-text hover:text-secondary transition duration-200 hover:scale-105">Pourquoi Nous Choisir</a>
+                <a href="#tarifs" class="text-dark-text hover:text-secondary transition duration-200 hover:scale-105">Tarifs</a>
+                <a href="#contact" class="btn-gradient px-4 py-2 rounded-lg text-white font-semibold shadow-lg transition duration-300">Démarrer un Projet</a>
             </div>
-        </section>
+            <!-- Bouton Menu Mobile -->
+            <button class="md:hidden p-2 rounded-md hover:bg-primary/10 transition duration-200">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </nav>
+    </header>
 
-        <!-- Our Approach Section -->
-        <section id="demarche" class="container mx-auto px-6 py-12">
-            <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 text-gray-800">Notre Démarche</h2>
-            <div class="bg-white p-8 md:p-12 rounded-2xl shadow-xl flex flex-col md:flex-row items-center space-y-8 md:space-y-0 md:space-x-12">
-                <div class="flex-1">
-                    <h3 class="text-2xl font-semibold mb-4 text-gray-900">Des solutions conçues pour vous</h3>
-                    <p class="text-gray-600 leading-relaxed">
-                        Toutes les solutions que nous proposons sont conçues pour être utilisées facilement par le client et répondre précisément à ses besoins. Notre objectif est de simplifier votre quotidien et d'améliorer votre productivité grâce à des outils personnalisés, intuitifs et performants. Nous vous accompagnons à chaque étape pour garantir le succès de votre projet.
+    <main>
+        <!-- Section 1 : Hero (AVEC EFFET DE PARTICULES) -->
+        <section class="hero-bg-gradient pt-24 pb-28 text-center bg-white relative">
+            <div class="particle-container">
+                <canvas id="particleCanvas"></canvas>
+            </div>
+            <div class="container mx-auto px-4 relative z-10">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-5xl sm:text-7xl font-extrabold mb-4 leading-tight text-primary">
+                        Transformer l'Idée en <span class="bg-clip-text text-transparent bg-gradient-to-r from-secondary to-orange-500">Réalité Numérique</span>.
+                    </h1>
+                    <p class="text-xl text-gray-700 mb-10 max-w-2xl mx-auto">
+                        EmberForge Digital Solutions : Conception, développement et marketing pour des produits numériques performants, esthétiques et adaptés.
                     </p>
-                </div>
-                <div class="md:w-1/3">
-                    <img src="https://placehold.co/400x300/a855f7/ffffff?text=Productivit%C3%A9" alt="Productivité améliorée" class="rounded-xl shadow-lg w-full">
+
+                    <a href="#contact" class="btn-gradient inline-block px-10 py-4 text-lg font-bold text-white rounded-xl shadow-xl uppercase tracking-wider">
+                        Démarrez Votre Transformation
+                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- Contact Section -->
-        <section id="contact" class="container mx-auto px-6 py-12 text-center">
-            <h2 class="text-3xl sm:text-4xl font-bold mb-4 text-gray-800">Prêt à démarrer votre projet ?</h2>
-            <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                Contactez-nous dès aujourd'hui pour obtenir une consultation gratuite et un devis personnalisé.
-            </p>
-            <button id="open-contact-modal-footer" class="bg-gray-800 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-105">
-                Nous contacter
-            </button>
+        <!-- Section 2 : Nos Services (Avec Fallback d'Image) -->
+        <section id="services" class="py-20 bg-light-bg">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold text-center mb-4 text-primary">Nos Piliers <span class="text-secondary">Numériques</span></h2>
+                <p class="text-center text-gray-600 mb-16 max-w-xl mx-auto">
+                    Une expertise complète pour forger votre succès en ligne, de la stratégie à la maintenance.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                    <!-- Carte Service 1 : Développement Web (Icône Code) -->
+                    <div class="card-light p-6 rounded-xl text-center shadow-lg">
+                        <div class="text-secondary mb-4">
+                            <!-- Placeholder Image (64x64px). Remplacez l'URL 'src' par votre propre image. -->
+                            <img 
+                                src="my-custom-icons/code.png" 
+                                onerror="fallbackToSvg(this, 'code')"
+                                class="icon-lg mx-auto" 
+                                alt="Icone de Code"
+                                width="64" height="64"
+                            />
+                        </div>
+                        <h3 class="text-2xl font-semibold mb-2 text-primary">Développement Web Sur Mesure</h3>
+                        <p class="text-gray-600 text-sm">
+                            Création de solutions web personnalisées, performantes, sécurisées et adaptées aux besoins spécifiques de chaque client. Sites vitrines, plateformes e-commerce, applications web.
+                        </p>
+                    </div>
+
+                    <!-- Carte Service 2 : UX/UI Design (Icône Design / Plume) -->
+                    <div class="card-light p-6 rounded-xl text-center shadow-lg">
+                        <div class="text-secondary mb-4">
+                            <!-- Placeholder Image (64x64px). Remplacez l'URL 'src' par votre propre image. -->
+                            <img 
+                                src="my-custom-icons/design.png" 
+                                onerror="fallbackToSvg(this, 'design')"
+                                class="icon-lg mx-auto" 
+                                alt="Icone de Design"
+                                width="64" height="64"
+                            />
+                        </div>
+                        <h3 class="text-2xl font-semibold mb-2 text-primary">Design UX/UI Impactant</h3>
+                        <p class="text-gray-600 text-sm">
+                            Conception de produits numériques esthétiques et ergonomiques. Nous transformons les idées en expériences utilisateur fluides et mémorables qui maximisent l'engagement.
+                        </p>
+                    </div>
+
+                    <!-- Carte Service 3 : Marketing Digital & SEO (Icône Croissance) -->
+                    <div class="card-light p-6 rounded-xl text-center shadow-lg">
+                        <div class="text-secondary mb-4">
+                            <!-- Placeholder Image (64x64px). Remplacez l'URL 'src' par votre propre image. -->
+                            <img 
+                                src="my-custom-icons/trending.png" 
+                                onerror="fallbackToSvg(this, 'trending')"
+                                class="icon-lg mx-auto" 
+                                alt="Icone de Croissance"
+                                width="64" height="64"
+                            />
+                        </div>
+                        <h3 class="text-2xl font-semibold mb-2 text-primary">Stratégie Digitale & Croissance</h3>
+                        <p class="text-gray-600 text-sm">
+                            Marketing digital pour vous aider à atteindre votre audience. Optimisation SEO de base, gestion des réseaux sociaux, création de contenu vidéo et graphique.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Section Maintenance/Support -->
+                <div class="mt-16 text-center max-w-4xl mx-auto p-8 rounded-xl bg-primary text-white shadow-2xl shadow-primary/30 transform transition duration-500 hover:scale-[1.01] hover:shadow-secondary/30">
+                    <p class="text-xl font-medium">
+                        <strong class="text-secondary">Support Continu :</strong> Nous assurons la maintenance et le support technique de vos plateformes pour une performance optimale 24/7.
+                    </p>
+                </div>
+            </div>
         </section>
 
+        <!-- Section 3 : Pourquoi Nous Choisir (Avec Fallback d'Image) -->
+        <section id="about" class="py-20 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold text-center mb-4 text-primary">Pourquoi Choisir <span class="text-secondary">EmberForge ?</span></h2>
+                <p class="text-center text-gray-700 mb-12 max-w-2xl mx-auto text-lg">
+                    Nous combinons expertise technique et vision stratégique pour garantir que votre projet ne soit pas seulement beau, mais aussi performant et évolutif.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Valeur 1: Excellence Technique (Icône Engrenages) -->
+                    <div class="card-light p-8 rounded-xl text-center shadow-lg">
+                        <div class="text-secondary mb-4">
+                            <!-- Placeholder Image (64x64px). Remplacez l'URL 'src' par votre propre image. -->
+                            <img 
+                                src="my-custom-icons/settings.png" 
+                                onerror="fallbackToSvg(this, 'settings')"
+                                class="icon-lg mx-auto" 
+                                alt="Icone d'Excellence Technique"
+                                width="64" height="64"
+                            />
+                        </div>
+                        <h3 class="text-2xl font-semibold mb-3 text-primary">Excellence Technique</h3>
+                        <p class="text-gray-600">
+                            Nous utilisons les technologies les plus modernes et adoptons des pratiques de codage strictes pour des solutions robustes, rapides et maintenables à long terme.
+                        </p>
+                    </div>
+
+                    <!-- Valeur 2: Design Centré Utilisateur (Icône Ampoule/Idée) -->
+                    <div class="card-light p-8 rounded-xl text-center shadow-lg">
+                        <div class="text-secondary mb-4">
+                            <!-- Placeholder Image (64x64px). Remplacez l'URL 'src' par votre propre image. -->
+                            <img 
+                                src="my-custom-icons/lightbulb.png" 
+                                onerror="fallbackToSvg(this, 'lightbulb')"
+                                class="icon-lg mx-auto" 
+                                alt="Icone d'Idée"
+                                width="64" height="64"
+                            />
+                        </div>
+                        <h3 class="text-2xl font-semibold mb-3 text-primary">Design Centré Utilisateur</h3>
+                        <p class="text-gray-600">
+                            Chaque interface est conçue pour l'humain. Nous assurons une expérience utilisateur (UX) fluide et un design (UI) qui renforce votre marque.
+                        </p>
+                    </div>
+
+                    <!-- Valeur 3: Partenariat Transparent (Icône Poignée de main) -->
+                    <div class="card-light p-8 rounded-xl text-center shadow-lg">
+                        <div class="text-secondary mb-4">
+                            <!-- Placeholder Image (64x64px). Remplacez l'URL 'src' par votre propre image. -->
+                            <img 
+                                src="my-custom-icons/handshake.png" 
+                                onerror="fallbackToSvg(this, 'handshake')"
+                                class="icon-lg mx-auto" 
+                                alt="Icone de Partenariat"
+                                width="64" height="64"
+                            />
+                        </div>
+                        <h3 class="text-2xl font-semibold mb-3 text-primary">Partenariat Transparent</h3>
+                        <p class="text-gray-600">
+                            Nous travaillons main dans la main avec vous. Vous bénéficiez d'une communication ouverte, de mises à jour régulières et d'une clarté totale sur l'avancement.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 4 : Tarifs -->
+        <section id="tarifs" class="py-20 bg-light-bg">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold text-center mb-4 text-primary">Nos Tarifs de <span class="text-secondary">Départ</span></h2>
+                <p class="text-center text-gray-700 mb-8 max-w-2xl mx-auto text-lg">
+                    Chaque projet étant unique, ces prix servent d'indicateurs de base pour vous aider à planifier. Un devis détaillé est fourni après analyse de vos besoins spécifiques.
+                </p>
+
+                <!-- BANNIÈRE DEVIS GRATUIT -->
+                <div class="text-center mb-12">
+                    <span class="inline-flex items-center px-6 py-3 rounded-full text-xl font-bold bg-secondary text-white shadow-xl shadow-secondary/40 transition duration-300 transform hover:scale-[1.03]">
+                        <!-- Icône Document/Devis (Icône secondaire, pas besoin de fallback ici) -->
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m-4-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-4M9 5h6"/></svg>
+                        Demandez Votre Devis Gratuit et Sans Engagement !
+                    </span>
+                </div>
+                <!-- FIN BANNIÈRE DEVIS GRATUIT -->
+
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+                    
+                    <!-- Les icônes des cartes de tarifs n'ont pas de fallback image/svg pour maintenir la simplicité -->
+                    
+                    <!-- Carte Tarif 1 : Site Web (Icône Globe) -->
+                    <div class="card-light p-6 rounded-xl text-center shadow-lg border-2 border-primary/10 hover:border-secondary">
+                        <div class="text-primary mb-3">
+                            <svg class="w-10 h-10 mx-auto" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2 12H22"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C15.636 4.7061 17.454 8.7061 17.454 12C17.454 15.2939 15.636 19.2939 12 22"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C8.364 4.7061 6.546 8.7061 6.546 12C6.546 15.2939 8.364 19.2939 12 22" opacity="0.5"/></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-1 text-primary">Site Internet</h3>
+                        <p class="text-secondary text-3xl font-extrabold">200€</p>
+                        <p class="text-gray-500 text-sm italic">à partir de</p>
+                    </div>
+
+                    <!-- Carte Tarif 2 : Nom de Domaine/Email (Icône Email) -->
+                    <div class="card-light p-6 rounded-xl text-center shadow-lg border-2 border-primary/10 hover:border-secondary">
+                        <div class="text-primary mb-3">
+                            <svg class="w-10 h-10 mx-auto" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 6L12 13 2 6"/></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-1 text-primary">Domaine & Email Pro</h3>
+                        <p class="text-secondary text-3xl font-extrabold">50€</p>
+                        <p class="text-gray-500 text-sm italic">à partir de</p>
+                    </div>
+
+                    <!-- Carte Tarif 3 : Design Personnalisé (Icône Palette) -->
+                    <div class="card-light p-6 rounded-xl text-center shadow-lg border-2 border-primary/10 hover:border-secondary">
+                        <div class="text-primary mb-3">
+                            <svg class="w-10 h-10 mx-auto" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M7 22H4a2 2 0 01-2-2V7a2 2 0 012-2h3"/><path stroke-linecap="round" stroke-linejoin="round" d="M17 2H20a2 2 0 012 2v13a2 2 0 01-2 2h-3"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7H12.01"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 12H12.01"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 17H12.01"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2V22"/></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-1 text-primary">Design Personnalisé</h3>
+                        <p class="text-secondary text-3xl font-extrabold">20€</p>
+                        <p class="text-gray-500 text-sm italic">à partir de</p>
+                    </div>
+
+                    <!-- Carte Tarif 4 : Applications/Logiciels (Icône Applications) -->
+                    <div class="card-light p-6 rounded-xl text-center shadow-lg border-2 border-primary/10 hover:border-secondary">
+                        <div class="text-primary mb-3">
+                            <svg class="w-10 h-10 mx-auto" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8h5V4H4v4z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 8h5V4h-5v4z"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 20h5v-4H4v4z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 20h5v-4h-5v4z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-1 text-primary">App. & Logiciels</h3>
+                        <p class="text-secondary text-3xl font-extrabold">300€</p>
+                        <p class="text-gray-500 text-sm italic">à partir de</p>
+                    </div>
+                </div>
+                
+                <p class="text-center text-gray-600 mt-10 max-w-2xl mx-auto">
+                    *Les prix sont basés sur les fonctionnalités minimales et peuvent varier significativement selon la complexité et les exigences.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 5 : Contact (Call to Action final) -->
+        <section id="contact" class="py-20 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="max-w-3xl mx-auto text-center p-10 rounded-3xl card-light shadow-2xl border-secondary/20">
+                    <h2 class="text-4xl font-bold mb-4 text-primary">Prêt à Forger Votre Avenir Digital ?</h2>
+                    <p class="text-lg text-gray-700 mb-8">
+                        Chaque projet est unique. Contactez-nous pour une analyse sur mesure et un devis adapté à vos ambitions.
+                    </p>
+                    <a href="mailto:contact@emberforge.fr" class="btn-gradient inline-block px-10 py-4 text-lg font-bold text-white rounded-xl shadow-2xl uppercase tracking-wider">
+                        Contacter l'Équipe
+                    </a>
+                    <p class="text-sm text-gray-500 mt-4">
+                        <span class="font-semibold">Tel :</span> +221 76 615 79 31
+                    </p>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-12">
-        <div class="container mx-auto px-6 text-center">
-            <p>&copy; 2024 EmberForge. Tous droits réservés.</p>
+    <!-- Pied de Page (Footer) -->
+    <footer class="bg-primary py-8 mt-12 border-t border-white/10">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-300">
+            <p>&copy; 2025 EmberForge Digital Solutions. Tous droits réservés.</p>
+            <div class="mt-2 space-x-4 flex justify-center items-center">
+                <a href="#" class="hover:text-secondary transition duration-200">Mentions Légales</a>
+                <span class="text-gray-400">|</span>
+                <a href="#" class="hover:text-secondary transition duration-200">Politique de Confidentialité</a>
+                <span class="text-gray-400">|</span>
+                <!-- LIEN ADMIN -->
+                <a href="#" onclick="event.preventDefault(); showAdminModal();" class="hover:text-secondary transition duration-200 font-bold tracking-wider">Accès Administrateur</a>
+                <!-- FIN LIEN ADMIN -->
+            </div>
         </div>
     </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const downloadButton = document.getElementById('download-brochure');
-            const brochureModal = document.getElementById('brochure-modal');
-            const closeBrochureModalButton = document.getElementById('close-brochure-modal');
-
-            const openContactModalHeroButton = document.getElementById('open-contact-modal-hero');
-            const openContactModalPricingButton = document.getElementById('open-contact-modal-pricing');
-            const openContactModalFooterButton = document.getElementById('open-contact-modal-footer');
-            const contactModal = document.getElementById('contact-modal');
-            const closeContactModalButton = document.getElementById('close-contact-modal');
-            const phoneNumberInput = document.getElementById('phone-number');
-
-            // Set default value for phone number input
-            phoneNumberInput.value = '+33 ';
-
-            // Brochure modal logic
-            downloadButton.addEventListener('click', (event) => {
-                event.preventDefault();
-                brochureModal.classList.remove('hidden');
-                brochureModal.classList.add('flex');
-            });
-
-            closeBrochureModalButton.addEventListener('click', () => {
-                brochureModal.classList.add('hidden');
-                brochureModal.classList.remove('flex');
-            });
-
-            brochureModal.addEventListener('click', (event) => {
-                if (event.target === brochureModal) {
-                    brochureModal.classList.add('hidden');
-                    brochureModal.classList.remove('flex');
-                }
-            });
-
-            // Contact modal logic
-            const openContactModals = [openContactModalHeroButton, openContactModalPricingButton, openContactModalFooterButton];
-            openContactModals.forEach(button => {
-                button.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    contactModal.classList.remove('hidden');
-                    contactModal.classList.add('flex');
-                });
-            });
-
-            closeContactModalButton.addEventListener('click', () => {
-                contactModal.classList.add('hidden');
-                contactModal.classList.remove('flex');
-            });
-
-            contactModal.addEventListener('click', (event) => {
-                if (event.target === contactModal) {
-                    contactModal.classList.add('hidden');
-                    contactModal.classList.remove('flex');
-                }
-            });
-        });
-    </script>
 </body>
 </html>
