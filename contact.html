@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contactez EmberForge | Solutions Digitales</title>
+    <!-- FAVICON PLACEHOLDER -->
+    <link rel="icon" type="image/png" href="img/favicon.png">
+    <!-- Chargement de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Définition des couleurs personnalisées Tailwind */
+        :root {
+            --color-primary: #314160; /* Nouveau Bleu Marine */
+            --color-secondary: #F97316; /* Orange Vif (Accent) */
+            --color-light-bg: #FFFFFF; /* Fond très clair (Blanc) */
+            --color-dark-text: #1F2937; /* Texte principal foncé (Gris très foncé) */
+        }
+        
+        /* Classes adaptées au fond clair */
+        .bg-light-bg { background-color: var(--color-light-bg); }
+        .bg-primary { background-color: var(--color-primary); }
+        .text-primary { color: var(--color-primary); }
+        .text-secondary { color: var(--color-secondary); }
+        .border-secondary { border-color: var(--color-secondary); }
+
+        /* --- NOUVELLE ANIMATION DE FLAMME SUR LE LOGO --- */
+        @keyframes flame-flicker {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animated-logo-text {
+            background-size: 200% 200%; 
+            animation: flame-flicker 15s ease infinite;
+        }
+
+        /* --- EFFETS VISUELS GLOBALES (Navigation) --- */
+        
+        .nav-header {
+             border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+             box-shadow: 0 4px 15px rgba(49, 65, 96, 0.08); 
+        }
+
+        .nav-link-effect {
+            position: relative;
+            padding-bottom: 8px;
+        }
+        .nav-link-effect::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background-color: var(--color-secondary);
+            border-radius: 9999px;
+            transition: width 0.3s ease-out, left 0.3s ease-out, box-shadow 0.3s;
+        }
+        .nav-link-effect:hover::after,
+        .nav-link-effect.active::after { /* La classe active n'est pas utilisée ici, car c'est la page de contact */
+            width: 100%;
+            left: 0;
+            box-shadow: 0 0 12px var(--color-secondary);
+        }
+
+        /* Canvas pour les particules dans la barre de navigation (Cendres/Embers) */
+        #navParticleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; 
+            opacity: 0.9; 
+            pointer-events: none; 
+        }
+
+        /* Dégradé et Effets pour le Bouton Principal (CTA) */
+        .btn-gradient {
+            background-image: linear-gradient(to right, var(--color-secondary), #FFAC60); 
+            transition: transform 0.3s, box-shadow 0.3s, filter 0.3s;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4); 
+        }
+        .btn-gradient:hover {
+            transform: scale(1.02); 
+            box-shadow: 0 15px 40px rgba(249, 115, 22, 0.7);
+            filter: brightness(1.1);
+        }
+        
+        /* Styles généraux */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-light-bg);
+            color: var(--color-dark-text);
+        }
+
+        .logo-img { height: 32px; width: auto; }
+
+        .icon-fallback {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--color-secondary);
+            font-size: 10px;
+            font-weight: bold;
+            padding: 5px;
+            border: 2px solid var(--color-secondary);
+            border-radius: 10px;
+            width: 64px; 
+            height: 64px; 
+            margin: auto;
+            white-space: nowrap; 
+            overflow: hidden;
+        }
+        
+        /* Style pour le formulaire de contact */
+        .contact-card {
+            box-shadow: 0 15px 40px rgba(49, 65, 96, 0.1); 
+        }
+        .contact-info-card {
+            border: 1px solid #E5E7EB;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s;
+        }
+        .contact-info-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(249, 115, 22, 0.1); 
+            border-color: var(--color-secondary);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#314160', 
+                        'secondary': '#F97316', 
+                        'light-bg': '#FFFFFF',
+                        'dark-text': '#1F2937',
+                    }
+                }
+            }
+        }
+
+        // --- ICON FALLBACK LOGIC ---
+        function fallbackToPlaceholder(element, filename) {
+            element.onerror = null; 
+            const fallbackDiv = document.createElement('div');
+            fallbackDiv.className = 'icon-fallback';
+            fallbackDiv.innerHTML = `Placeholder:<br>${filename}`;
+            if (element.parentNode) {
+                element.parentNode.replaceChild(fallbackDiv, element);
+            }
+        }
+
+        // --- LOGIQUE DE NAVIGATION MOBILE ---
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const button = document.getElementById('mobile-menu-button');
+            const isOpen = menu.classList.contains('hidden');
+            
+            if (isOpen) {
+                menu.classList.remove('hidden');
+                // Changer l'icône du menu en croix
+                button.innerHTML = '<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+            } else {
+                menu.classList.add('hidden');
+                // Changer l'icône de la croix en menu
+                button.innerHTML = '<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>';
+            }
+        }
+        
+        function closeMobileMenu() {
+            document.getElementById('mobile-menu').classList.add('hidden');
+            // S'assurer que l'icône redevient le menu burger
+            document.getElementById('mobile-menu-button').innerHTML = '<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>';
+        }
+
+        // --- PARTICULES POUR LA BARRE DE NAVIGATION (Cinders/Embers) ---
+        let navParticles = [];
+        const navParticleCount = 80;
+
+        class Cinder {
+            constructor(canvas) {
+                this.reset(canvas);
+            }
+
+            reset(canvas) {
+                // Commence à droite et se déplace vers la gauche (vitesse réduite)
+                this.x = canvas.width + Math.random() * 20; 
+                this.y = Math.random() * canvas.height;
+                this.radius = Math.random() * 2 + 1;
+                
+                // Vitesse RÉDUITE pour un effet subtil (comme demandé précédemment)
+                this.speedX = -(Math.random() * 0.5 + 0.3); 
+                this.speedY = (Math.random() - 0.5) * 0.2;
+                
+                this.opacity = Math.random() * 0.6 + 0.4;
+                this.color = `rgba(249, 115, 22, ${this.opacity})`;
+            }
+
+            update(canvas) {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < -10) this.reset(canvas);
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = `rgba(249, 115, 22, ${this.opacity * 0.8})`; 
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function initNavParticles() {
+            const canvas = document.getElementById('navParticleCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            function resizeNavCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                navParticles = [];
+                for (let i = 0; i < navParticleCount; i++) {
+                    navParticles.push(new Cinder(canvas));
+                }
+            }
+
+            // Initialisation initiale
+            navParticles = [];
+            for (let i = 0; i < navParticleCount; i++) {
+                navParticles.push(new Cinder(canvas));
+            }
+
+            function animateNavParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                for (let i = 0; i < navParticles.length; i++) {
+                    navParticles[i].update(canvas);
+                    navParticles[i].draw(ctx);
+                }
+                requestAnimationFrame(animateNavParticles);
+            }
+
+            resizeNavCanvas();
+            animateNavParticles();
+
+            window.addEventListener('resize', resizeNavCanvas);
+        }
+
+        // --- LOGIQUE DU FORMULAIRE DE CONTACT SIMULÉ ---
+        function handleContactSubmit(event) {
+            event.preventDefault(); 
+            
+            const form = document.getElementById('contactForm');
+            const feedbackElement = document.getElementById('formFeedback');
+            const data = {
+                name: form.name.value,
+                email: form.email.value,
+                subject: form.subject.value,
+                message: form.message.value
+            };
+
+            // Validation simple
+            if (!data.name || !data.email || !data.subject || !data.message) {
+                feedbackElement.textContent = "Veuillez remplir tous les champs requis.";
+                feedbackElement.className = 'text-red-600 font-semibold mt-4 p-3 bg-red-100 rounded-lg';
+                return;
+            }
+
+            // Simulation d'envoi (pas de vrai backend)
+            feedbackElement.textContent = "Envoi en cours...";
+            feedbackElement.className = 'text-primary font-semibold mt-4 p-3 bg-gray-100 rounded-lg';
+
+            setTimeout(() => {
+                feedbackElement.textContent = "✅ Votre message a été reçu avec succès. Nous vous répondrons dans les 24 heures.";
+                feedbackElement.className = 'text-green-600 font-bold mt-4 p-3 bg-green-100 border border-green-300 rounded-lg transition-all duration-500';
+                form.reset(); // Effacer le formulaire
+            }, 1500);
+        }
+
+        
+        // --- INITIALISATION GLOBALE ET ÉVÉNEMENTS ---
+        window.onload = function() {
+            // Initialisation des particules NAV
+            initNavParticles();
+            
+            // Écouteur pour la soumission du formulaire
+            const contactForm = document.getElementById('contactForm');
+            if(contactForm) {
+                contactForm.addEventListener('submit', handleContactSubmit);
+            }
+            
+            // S'assurer que les liens de la navigation mobile ferment le menu
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+        };
+    </script>
+</head>
+<body class="bg-light-bg text-dark-text min-h-screen">
+    
+    <!-- En-tête (Navigation) -->
+    <header class="sticky top-0 z-50 bg-white bg-opacity-95 backdrop-blur-sm nav-header relative">
+        <!-- Canvas pour les particules "Cendres" dans la nav bar -->
+        <canvas id="navParticleCanvas"></canvas>
+
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center relative z-20">
+            <!-- Logo EmberForge -->
+            <a href="index.html" class="flex items-center space-x-2 transition duration-300 hover:opacity-80 shrink-0">
+                <img 
+                    src="img/logo.png" 
+                    alt="Logo EmberForge" 
+                    class="logo-img"
+                    onerror="fallbackToPlaceholder(this, 'logo.png')"
+                >
+                <span class="text-3xl font-extrabold tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary animated-logo-text">EmberForge</span>
+            </a>
+            
+            <!-- Liens de Navigation Desktop (MODIFIÉ - Accès Admin retiré) -->
+            <div class="hidden md:flex space-x-8 text-sm font-medium items-center">
+                <a href="index.html#services" class="text-dark-text hover:text-secondary transition duration-200 hover:scale-105 nav-link-effect">Services</a>
+                <a href="index.html#about" class="text-dark-text hover:text-secondary transition duration-200 hover:scale-105 nav-link-effect">Pourquoi Nous Choisir</a>
+                <a href="index.html#prestations" class="text-dark-text hover:text-secondary transition duration-200 hover:scale-105 nav-link-effect">Prestations</a>
+            </div>
+            
+            <!-- Bouton Menu Mobile (Burger/Croix) -->
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md hover:bg-primary/10 transition duration-200 z-30" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </nav>
+        
+        <!-- Menu Mobile (MODIFIÉ - Accès Admin retiré) -->
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-white shadow-xl md:hidden z-40 border-t border-gray-100 transition-all duration-300">
+            <div class="flex flex-col p-4 space-y-3">
+                <!-- Liens mobiles mis à jour vers index.html -->
+                <a href="index.html#services" class="text-dark-text hover:text-secondary py-3 text-center border-b border-gray-100 text-lg font-medium" onclick="closeMobileMenu()">Services</a>
+                <a href="index.html#about" class="text-dark-text hover:text-secondary py-3 text-center border-b border-gray-100 text-lg font-medium" onclick="closeMobileMenu()">Pourquoi Nous Choisir</a>
+                <a href="index.html#prestations" class="text-dark-text hover:text-secondary py-3 text-center text-lg font-medium" onclick="closeMobileMenu()">Prestations</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="py-16 sm:py-24">
+        <div class="container mx-auto px-4">
+            <header class="text-center mb-12 max-w-3xl mx-auto">
+                <h1 class="text-5xl font-extrabold mb-3 text-primary">
+                    Une <span class="text-secondary">Étincelle</span>, Un Projet.
+                </h1>
+                <p class="text-xl text-gray-700">
+                    Décrivez-nous votre vision. Notre équipe est prête à transformer vos idées en solutions numériques percutantes.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 max-w-6xl mx-auto">
+                
+                <!-- Colonne 1 : Formulaire de Contact -->
+                <div class="lg:col-span-2 bg-white p-6 sm:p-10 rounded-xl contact-card border border-gray-100">
+                    <h2 class="text-3xl font-bold mb-6 text-primary border-b pb-2 border-gray-100">Envoyez-Nous un Message</h2>
+                    
+                    <form id="contactForm" class="space-y-6">
+                        <!-- Nom et Prénom -->
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-dark-text mb-1">Nom Complet</label>
+                            <input type="text" id="name" name="name" required 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary transition duration-150"
+                                placeholder="Votre nom et prénom"
+                            >
+                        </div>
+                        
+                        <!-- Email -->
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-dark-text mb-1">Adresse E-mail</label>
+                            <input type="email" id="email" name="email" required 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary transition duration-150"
+                                placeholder="votre.email@exemple.com"
+                            >
+                        </div>
+
+                        <!-- Sujet -->
+                        <div>
+                            <label for="subject" class="block text-sm font-medium text-dark-text mb-1">Sujet du Message</label>
+                            <input type="text" id="subject" name="subject" required 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary transition duration-150"
+                                placeholder="Ex: Devis Site Vitrine / Demande de Support"
+                            >
+                        </div>
+
+                        <!-- Message -->
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-dark-text mb-1">Votre Message / Description du Projet</label>
+                            <textarea id="message" name="message" rows="5" required 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary transition duration-150"
+                                placeholder="Décrivez votre besoin en détail..."
+                            ></textarea>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            class="btn-gradient w-full py-3 text-lg font-bold text-white rounded-lg shadow-md hover:shadow-xl uppercase tracking-wider"
+                        >
+                            Envoyer le Message
+                        </button>
+                    </form>
+
+                    <!-- Zone de Feedback pour l'Envoi -->
+                    <div id="formFeedback" class="text-center transition-all duration-300"></div>
+                </div>
+
+                <!-- Colonne 2 : Informations de Contact -->
+                <div class="lg:col-span-1 space-y-8">
+                    
+                    <div class="contact-info-card p-6 rounded-xl bg-gray-50 text-center shadow-lg">
+                        <svg class="w-12 h-12 text-secondary mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.8 5.2a2 2 0 002.4 0L21 8m-18 8V6a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>
+                        <h3 class="text-xl font-semibold mb-2 text-primary">Email</h3>
+                        <p class="text-gray-600 font-medium">contact@emberforge.fr</p>
+                        <p class="text-sm text-gray-500 mt-1">Nous répondons rapidement.</p>
+                    </div>
+
+                    <div class="contact-info-card p-6 rounded-xl bg-gray-50 text-center shadow-lg">
+                        <svg class="w-12 h-12 text-secondary mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.293a1 1 0 01.707.293l3.586 3.586a1 1 0 01-.293 1.707l-2.75 1.714a1 1 0 00-.514.862v1.782a1 1 0 001.21.98l1.714-.75a1 1 0 011.707-.293l3.586 3.586a1 1 0 01.293.707V19a2 2 0 01-2 2H5a2 2 0 01-2-2v-2z"></path></svg>
+                        <h3 class="text-xl font-semibold mb-2 text-primary">Téléphone</h3>
+                        <p class="text-gray-600 font-medium">+33 07 65 87 83 87</p>
+                        <p class="text-sm text-gray-500 mt-1">Disponible du Lundi au Vendredi, 9h-17h.</p>
+                    </div>
+
+                    <div class="contact-info-card p-6 rounded-xl bg-gray-50 text-center shadow-lg">
+                        <svg class="w-12 h-12 text-secondary mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.99 1.99 0 01-2.828 0L6.343 16.657A8 8 0 1117.657 16.657zM12 11a2 2 0 100-4 2 2 0 000 4z"></path></svg>
+                        <h3 class="text-xl font-semibold mb-2 text-primary">Adresse</h3>
+                        <p class="text-gray-600 font-medium">6 Coron de Croix</p>
+                        <p class="text-gray-600 font-medium">59770 Marly (Siège Social)</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pied de Page (Footer) - MODIFIÉ -->
+    <footer class="bg-primary py-8 mt-16 border-t border-white/10">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-300">
+            <p>&copy; 2025 EmberForge Digital Solutions. Tous droits réservés.</p>
+            <div class="mt-2 space-x-4 flex justify-center items-center flex-wrap">
+                <a href="#" class="hover:text-secondary transition duration-200">Mentions Légales</a>
+                <span class="text-gray-400">|</span>
+                <a href="#" class="hover:text-secondary transition duration-200">Politique de Confidentialité</a>
+                <span class="text-gray-400">|</span>
+                 </div>
+        </div>
+    </footer>
+
+</body>
+</html>
