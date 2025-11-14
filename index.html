@@ -212,7 +212,7 @@
         // --- SYSTÈME DE PARTICULES HERO (RÉSEAU DE CONNEXION) ---
         let mouse = { x: null, y: null, radius: 100 };
         let heroParticles = [];
-        const heroParticleCount = 150; 
+        const heroParticleCount = 50; 
         const heroMaxDistance = 150; 
         const linkColor = 'rgba(249, 115, 22, 0.6)'; 
 
@@ -308,6 +308,7 @@
             requestAnimationFrame(() => animateHeroParticles(canvas, ctx));
         }
 
+        /*
         // --- PARTICULES POUR LA BARRE DE NAVIGATION (Cinders/Embers) ---
         let navParticles = [];
         const navParticleCount = 80; // AUGMENTÉ pour plus de particules
@@ -386,7 +387,7 @@
 
             window.addEventListener('resize', resizeNavCanvas);
         }
-
+*/
         // --- LOGIQUE DE LA MODALE ADMIN ---
         const ADMIN_PASSWORD = "emberforge1234";
 
@@ -571,11 +572,11 @@
                         Transformer l'Idée en <span class="bg-clip-text text-transparent bg-gradient-to-r from-secondary to-orange-500">Réalité Numérique</span>.
                     </h1>
                     <p class="text-xl text-gray-700 mb-10 max-w-2xl mx-auto">
-                        EmberForge Digital Solutions : Conception, développement et marketing pour des produits numériques performants, esthétiques et adaptés.
+                        EmberForge est LE partenaire pour donner vie à vos idées et vous aider à améliorer votre quotidien avec des outils informatiques simples à utiliser.
                     </p>
 
                     <a href="contact.html" class="btn-gradient inline-block px-10 py-4 text-lg font-bold text-white rounded-xl shadow-xl uppercase tracking-wider">
-                        Démarrez Votre Transformation
+                        Commencez votre transformation !
                     </a>
                 </div>
             </div>
@@ -586,7 +587,7 @@
             <div class="container mx-auto px-4">
                 <h2 class="text-4xl font-bold text-center mb-4 text-primary">Nos Piliers <span class="text-secondary">Numériques</span></h2>
                 <p class="text-center text-gray-600 mb-16 max-w-xl mx-auto">
-                    Une expertise complète pour forger votre succès en ligne, de la stratégie à la maintenance.
+                    Notre expertise pour vous aider à forger votre succès en ligne, de la stratégie à la maintenance.
                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -601,9 +602,9 @@
                                 alt="Icone de Code"
                             />
                         </div>
-                        <h3 class="text-2xl font-semibold mb-2 text-primary">Développement Web Sur Mesure</h3>
+                        <h3 class="text-2xl font-semibold mb-2 text-primary">Développement sur mesure</h3>
                         <p class="text-gray-600 text-sm">
-                            Création de solutions web personnalisées, performantes, sécurisées et adaptées aux besoins spécifiques de chaque client. Sites vitrines, plateformes e-commerce, applications web.
+                            Création de site et application web personnalisées, performantes, sécurisées et adaptées aux besoins spécifiques de chaque client. Sites vitrines, plateformes e-commerce, outils de facturation, ...
                         </p>
                     </div>
 
@@ -617,9 +618,9 @@
                                 alt="Icone de Design"
                             />
                         </div>
-                        <h3 class="text-2xl font-semibold mb-2 text-primary">Design UX/UI Impactant</h3>
+                        <h3 class="text-2xl font-semibold mb-2 text-primary">Design ergonomiques</h3>
                         <p class="text-gray-600 text-sm">
-                            Conception de produits numériques esthétiques et ergonomiques. Nous transformons les idées en expériences utilisateur fluides et mémorables qui maximisent l'engagement.
+                            Conception de design numériques esthétiques et ergonomiques. Nous créons avec vous votre identité visuelle pour améliorer votre visibilité.
                         </p>
                     </div>
 
@@ -627,15 +628,15 @@
                     <div class="card-light p-6 rounded-xl text-center shadow-lg">
                         <div class="text-secondary mb-4 flex justify-center items-center">
                             <img 
-                                src="img/trending.png" 
+                                src="img/support.png" 
                                 onerror="fallbackToPlaceholder(this, 'trending.png')"
                                 class="icon-lg" 
                                 alt="Icone de Croissance"
                             />
                         </div>
-                        <h3 class="text-2xl font-semibold mb-2 text-primary">Stratégie Digitale & Croissance</h3>
+                        <h3 class="text-2xl font-semibold mb-2 text-primary">Aide et support rapide</h3>
                         <p class="text-gray-600 text-sm">
-                            Marketing digital pour vous aider à atteindre votre audience. Optimisation SEO de base, gestion des réseaux sociaux, création de contenu vidéo et graphique.
+                            Nous vous accompagnons dans l'utilisation des solutions que nous créons pour vous et assurons un support technique rapide.
                         </p>
                     </div>
                 </div>
@@ -643,7 +644,7 @@
                 <!-- Section Maintenance/Support -->
                 <div class="mt-16 text-center max-w-4xl mx-auto p-8 rounded-xl bg-primary text-white shadow-2xl shadow-primary/30 transform transition duration-500 hover:scale-[1.01] hover:shadow-secondary/30">
                     <p class="text-xl font-medium">
-                        <strong class="text-secondary">Support Continu :</strong> Nous assurons la maintenance et le support technique de vos plateformes pour une performance optimale 24/7.
+                        <strong class="text-secondary">Support :</strong> Nous assurons la maintenance et le support technique de vos plateformes pour une performance optimale.
                     </p>
                 </div>
             </div>
@@ -720,8 +721,7 @@
                 <!-- BANNIÈRE DEVIS GRATUIT -->
                 <div class="text-center mb-12">
                     <span class="inline-flex items-center px-6 py-3 rounded-full text-xl font-bold bg-secondary text-white shadow-xl shadow-secondary/40 transition duration-300 transform hover:scale-[1.03]">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m-4-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-4M9 5h6"/></svg>
-                        Contactez-nous pour une estimation sur mesure !
+                        <a href="contact.html"> Contactez-nous pour une estimation sur mesure ! </a>
                     </span>
                 </div>
 
@@ -753,9 +753,9 @@
                                 alt="Icone de Moniteur"
                             />
                         </div>
-                        <h3 class="text-xl font-semibold mb-3 text-primary">Refonte UX/UI</h3>
+                        <h3 class="text-xl font-semibold mb-3 text-primary">Création de logo et flyers</h3>
                         <p class="text-gray-600 text-sm">
-                            Analyse de l'expérience utilisateur actuelle, prototypage (Figma), et modernisation complète de l'interface pour améliorer les taux de conversion.
+                            Nous identifions avec vous ce qui rend votre activité unique et créons, avec vous, un logo et des affiches uniques vous correspondant tout en étant moderne.
                         </p>
                     </div>
 
@@ -769,7 +769,7 @@
                                 alt="Icone de Panier"
                             />
                         </div>
-                        <h3 class="text-xl font-semibold mb-3 text-primary">E-commerce sur Mesure</h3>
+                        <h3 class="text-xl font-semibold mb-3 text-primary">E-commerce sur mesure</h3>
                         <p class="text-gray-600 text-sm">
                             Mise en place de plateformes de vente en ligne (Stripe, PayPal) avec gestion d'inventaire, sécurité des transactions et parcours client optimisé.
                         </p>
@@ -785,9 +785,9 @@
                                 alt="Icone d'Outils"
                             />
                         </div>
-                        <h3 class="text-xl font-semibold mb-3 text-primary">Application Web Custom</h3>
+                        <h3 class="text-xl font-semibold mb-3 text-primary">Application personnalisé</h3>
                         <p class="text-gray-600 text-sm">
-                            Développement d'outils internes spécifiques (CRM légers, API backend) ou de logiciels adaptés aux processus métier uniques de votre entreprise.
+                            Développement d'outils internes spécifiques (facturation, prise de commande, ...) ou de logiciels adaptés aux processus métier uniques de votre entreprise.
                         </p>
                     </div>
                 </div>
@@ -810,7 +810,7 @@
                         Contacter l'Équipe
                     </a>
                     <p class="text-sm text-gray-500 mt-4">
-                        <span class="font-semibold">Tel :</span> +221 76 615 79 31
+                        <span class="font-semibold">Tel :</span> +33 7 65 87 83 87
                     </p>
                 </div>
             </div>
