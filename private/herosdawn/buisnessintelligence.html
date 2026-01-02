@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero's Dawn - Business Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617; /* slate-950 */
+            color: #f8fafc; /* slate-50 */
+        }
+
+        .dawn-gradient-text {
+            background: linear-gradient(to right, #fef3c7, #fbbf24, #ea580c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(251, 191, 36, 0.1);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fbbf24; }
+
+        input[type=range] {
+            accent-color: #fbbf24;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .tab-btn.active {
+            background-color: #d97706; /* amber-600 */
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(217, 119, 6, 0.2);
+        }
+
+        #retention-svg {
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body class="min-h-screen pt-24 pb-32 overflow-x-hidden selection:bg-amber-500/30">
+
+    <!-- NAVIGATION PRINCIPALE -->
+    <nav class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-2xl bg-slate-900/60 backdrop-blur-xl border border-amber-500/10 p-2 rounded-2xl shadow-2xl flex items-center justify-between">
+        <div class="flex items-center gap-3 px-3 border-r border-amber-500/10 mr-1">
+            <div class="w-8 h-8 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20">H</div>
+        </div>
+        <div class="flex flex-1 justify-around gap-1">
+            <button onclick="switchTab('recap')" id="btn-recap" class="tab-btn flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-500 hover:text-white hover:bg-white/5 active">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                <span class="hidden md:inline">Synthèse</span>
+            </button>
+            <button onclick="switchTab('market')" id="btn-market" class="tab-btn flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-500 hover:text-white hover:bg-white/5">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                <span class="hidden md:inline">ROI</span>
+            </button>
+            <button onclick="switchTab('financial')" id="btn-financial" class="tab-btn flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-500 hover:text-white hover:bg-white/5">
+                <i data-lucide="euro" class="w-3.5 h-3.5"></i>
+                <span class="hidden md:inline">Budget</span>
+            </button>
+            <button onclick="switchTab('planning')" id="btn-planning" class="tab-btn flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-500 hover:text-white hover:bg-white/5">
+                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                <span class="hidden md:inline">Planning</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- HEADER -->
+    <div class="max-w-6xl mx-auto px-6 relative">
+        <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-amber-500/10 pb-10">
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="sun" class="text-amber-500 animate-pulse w-4 h-4"></i>
+                    <span class="text-[10px] text-amber-500 uppercase font-black tracking-[0.4em]">EmberForge Strategy Board</span>
+                </div>
+                <h1 class="text-7xl font-black tracking-tighter uppercase italic dawn-gradient-text">Hero's Dawn</h1>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-[0.4em] mt-3 italic ml-1">A Tales of Nyr Story • Business Intelligence</p>
+            </div>
+            <div class="px-8 py-5 glass-card rounded-[2rem] text-center shadow-2xl border border-amber-500/10">
+                <div class="text-[10px] text-slate-500 uppercase font-black mb-1 tracking-widest">Lancement Estimé</div>
+                <div id="launch-date-display" class="text-2xl font-black text-amber-100 italic">Juin 2027</div>
+            </div>
+        </header>
+
+        <!-- TAB CONTENT: RECAP -->
+        <section id="content-recap" class="tab-content active space-y-8 animate-in fade-in duration-500">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card rounded-[3rem] p-10 flex flex-col justify-center relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
+                    <div class="flex items-center gap-3 mb-8">
+                        <i data-lucide="sword" class="text-amber-500 w-6 h-6"></i>
+                        <h3 class="text-sm font-black uppercase italic text-white tracking-widest">Vision Produit</h3>
+                    </div>
+                    <div class="space-y-5">
+                        <div class="p-5 bg-white/[0.03] rounded-3xl border border-white/5 group-hover:bg-amber-500/5 transition-colors">
+                            <p class="text-[9px] font-black uppercase text-amber-500 mb-2 tracking-widest italic">Positionnement</p>
+                            <p class="text-[12px] text-slate-300 font-medium leading-relaxed">Remettre au goût du jour le genre <strong>Turn-Based</strong> avec une qualité console, prouvant que le mobile est un écrin propice aux grandes épopées narratives.</p>
+                        </div>
+                        <div class="p-5 bg-white/[0.03] rounded-3xl border border-white/5 group-hover:bg-amber-500/5 transition-colors">
+                            <p class="text-[9px] font-black uppercase text-amber-500 mb-2 tracking-widest italic">Expérience Tactile</p>
+                            <p class="text-[12px] text-slate-300 font-medium leading-relaxed">Look "Toy-Style" PBR ultra-tangible pour un sentiment de possession immédiat.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-gradient-to-br from-amber-900/10 to-slate-900/80 border border-amber-500/20 rounded-[3.5rem] p-12 relative overflow-hidden shadow-2xl flex flex-col justify-center">
+                    <div class="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] -mr-40 -mt-40"></div>
+                    <h3 class="text-3xl font-black mb-8 uppercase italic flex items-center gap-4">
+                        <i data-lucide="sparkles" class="text-amber-400 w-8 h-8"></i> Rapport Exécutif
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-sm mb-10">
+                        <div class="space-y-5">
+                            <div class="flex justify-between border-b border-amber-500/10 pb-3">
+                                <span class="text-slate-500 font-bold uppercase text-[10px]">Investissement</span>
+                                <span id="recap-budget-total" class="font-black text-amber-400 text-lg">0 €</span>
+                            </div>
+                            <div class="flex justify-between border-b border-amber-500/10 pb-3">
+                                <span class="text-slate-500 font-bold uppercase text-[10px]">CA Ciblé (An 1)</span>
+                                <span id="recap-projections-y1" class="font-black text-emerald-400 text-lg">0 €</span>
+                            </div>
+                        </div>
+                        <div class="space-y-5">
+                            <div class="flex justify-between border-b border-amber-500/10 pb-3">
+                                <span class="text-slate-500 font-bold uppercase text-[10px]">Burn Rate Opex</span>
+                                <span id="recap-burn-rate" class="font-black text-orange-400 text-lg">0 €</span>
+                            </div>
+                            <div class="flex justify-between border-b border-amber-500/10 pb-3">
+                                <span class="text-slate-500 font-bold uppercase text-[10px]">Temps de Prod</span>
+                                <span id="recap-weeks" class="font-black text-white text-lg">0 semaines</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-8 bg-amber-500/5 rounded-[2.5rem] border border-amber-500/10 flex items-center gap-8 group">
+                        <div class="p-5 bg-amber-500/20 text-amber-400 rounded-3xl shadow-inner group-hover:scale-110 transition-transform">
+                            <i data-lucide="trophy" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-black uppercase text-xs italic mb-2 text-amber-200 tracking-widest">Stratégie Console-Mobile</h4>
+                            <p class="text-xs text-slate-400 leading-relaxed max-w-lg font-medium">Le projet Hero's Dawn exploite la puissance des terminaux actuels pour imposer une DA "Console-Quality", transformant le smartphone en une véritable plateforme tactique.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB CONTENT: MARKET -->
+        <section id="content-market" class="tab-content space-y-10 animate-in fade-in duration-500">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="glass-card rounded-[3rem] p-10 shadow-lg">
+                    <h3 class="text-xl font-black mb-8 uppercase italic flex items-center gap-3 text-amber-500">
+                        <i data-lucide="search" class="w-5 h-5"></i> Analyse Marché
+                    </h3>
+                    <div class="space-y-8">
+                        <div class="space-y-2">
+                            <p class="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em]">Cœur de Cible</p>
+                            <p class="text-xs text-slate-300 font-medium leading-relaxed italic border-l-2 border-amber-500/20 pl-4">Hommes/Femmes 25-45 ans. Fans de jeux de plateau et collectionneurs. Attirés par la tactique et l'esthétique 'Luxe'.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em]">Innovation</p>
+                            <p class="text-xs text-amber-300 font-bold leading-relaxed italic border-l-2 border-amber-500/20 pl-4">Le rendu "PBR tangible" crée un sentiment de possession et de rareté, dopant les revenus IAP.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 glass-card rounded-[3rem] p-10 shadow-lg flex flex-col">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xl font-black uppercase italic text-amber-400">Rétention & Longe-Traîne</h3>
+                        <div class="px-4 py-1 bg-amber-500/10 rounded-full text-[9px] font-black uppercase text-amber-500">Modèle Prédictif</div>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-6 italic">Visualisez la survie de votre base de joueurs sur le long terme.</p>
+                    
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 mb-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Fenêtre temporelle : <span id="retention-days-display" class="text-white">30 Jours</span></label>
+                        </div>
+                        <input type="range" min="7" max="1825" step="7" value="30" id="retention-range" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                        <div class="flex justify-between text-[8px] font-black text-slate-600 mt-2 uppercase">
+                            <span>1 Semaine</span>
+                            <span>1 An</span>
+                            <span>3 Ans</span>
+                            <span>5 Ans</span>
+                        </div>
+                    </div>
+
+                    <!-- Chart Placeholder -->
+                    <div class="w-full h-56 relative mt-6" id="chart-container">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full overflow-visible" id="retention-svg">
+                            <!-- Grille -->
+                            <line x1="0" y1="50" x2="100" y2="50" stroke="white" stroke-width="0.1" stroke-dasharray="2" opacity="0.1"></line>
+                            <line x1="0" y1="75" x2="100" y2="75" stroke="white" stroke-width="0.1" stroke-dasharray="2" opacity="0.1"></line>
+                            
+                            <path id="chart-area" d="" fill="rgba(245, 158, 11, 0.05)"></path>
+                            <polyline id="chart-line" fill="none" stroke="#fbbf24" stroke-width="1" points=""></polyline>
+                            
+                            <!-- Curseur dynamique -->
+                            <line id="chart-v-line" x1="0" y1="0" x2="0" y2="100" stroke="white" stroke-width="0.3" stroke-dasharray="2" opacity="0" />
+                            <circle id="chart-cursor" r="1.5" fill="white" stroke="#fbbf24" stroke-width="0.5" class="hidden opacity-0"></circle>
+                        </svg>
+                        
+                        <!-- Tooltip flottant -->
+                        <div id="chart-tooltip" class="absolute pointer-events-none opacity-0 bg-slate-900/95 border border-amber-500/30 p-3 rounded-xl text-[10px] shadow-2xl backdrop-blur-md z-10 transition-opacity duration-200">
+                            <div id="tooltip-day" class="text-slate-500 uppercase font-black tracking-tighter mb-1">Jour 0</div>
+                            <div id="tooltip-val" class="text-xl font-black text-amber-500">100%</div>
+                            <div class="text-[7px] text-slate-400 mt-1 uppercase font-bold italic">Base active</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-card rounded-[3rem] p-12 shadow-2xl">
+                <h3 class="text-2xl font-black mb-10 uppercase italic text-white flex justify-between items-center">
+                    Projections Financières
+                    <span id="market-scenario-label" class="text-xs font-black text-amber-500 italic bg-amber-500/10 px-4 py-1 rounded-full uppercase">Succès Indie</span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-8" id="projections-grid">
+                    <!-- Dynamic projections go here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB CONTENT: FINANCIAL -->
+        <section id="content-financial" class="tab-content space-y-10 animate-in fade-in duration-500 pb-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="budget-cards-container">
+                <!-- Dynamic cards go here -->
+            </div>
+        </section>
+
+        <!-- TAB CONTENT: PLANNING -->
+        <section id="content-planning" class="tab-content space-y-12 animate-in fade-in duration-500 pb-20">
+            <div class="space-y-10" id="phases-container">
+                <!-- Dynamic accordion go here -->
+            </div>
+        </section>
+
+        <footer class="mt-24 pt-12 border-t border-amber-500/10 text-center flex flex-col items-center gap-4 opacity-40">
+            <p class="text-[11px] font-black uppercase tracking-[1em] text-slate-600 italic">Hero's Dawn • Strategic Ops v4.7</p>
+            <div class="flex gap-10 text-[9px] font-black uppercase tracking-[0.3em] text-slate-700"><span>© 2026 EmberForge Studio</span><span>Dawn Engine v2.01</span></div>
+        </footer>
+    </div>
+
+    <!-- QUICK CONFIG BANDEAU -->
+    <div class="fixed bottom-6 right-6 left-6 z-50 flex justify-center pointer-events-none">
+        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-3xl border border-amber-500/20 p-2 rounded-[2rem] shadow-2xl flex flex-wrap items-center gap-4 max-w-4xl px-6 ring-1 ring-white/5">
+            <div class="hidden md:flex items-center gap-2 px-3 border-r border-white/10 mr-1 py-1">
+                <i data-lucide="settings" class="text-amber-500 w-3.5 h-3.5"></i>
+                <span class="text-[9px] font-black uppercase tracking-widest text-slate-500">Config</span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <span class="text-[8px] font-black uppercase tracking-tighter text-slate-500">Marché</span>
+                <div class="relative">
+                    <select id="market-select" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-bold text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 appearance-none pr-8 cursor-pointer hover:bg-white/10 transition-all">
+                        <option value="fail">Échec / Niche</option>
+                        <option value="probable" selected>Succès Indie</option>
+                        <option value="hit">Hit Global</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="text-[8px] font-black uppercase tracking-tighter text-slate-500">Tempo</span>
+                <div class="relative">
+                    <select id="tempo-select" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-bold text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 appearance-none pr-8 cursor-pointer hover:bg-white/10 transition-all">
+                        <option value="sprint">Le Sprint</option>
+                        <option value="balanced">Équilibré</option>
+                        <option value="june" selected>Cible Juin 2027</option>
+                        <option value="security">Sécurité</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="hidden lg:flex items-center gap-4 ml-2 px-4 py-1.5 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+                <div class="flex flex-col text-center">
+                    <span class="text-[7px] font-black uppercase text-amber-500 leading-none">CA AN 1</span>
+                    <span id="footer-ca-y1" class="text-[11px] font-black text-white leading-tight">0 €</span>
+                </div>
+                <div class="w-px h-6 bg-amber-500/20"></div>
+                <div class="flex flex-col text-center">
+                    <span class="text-[7px] font-black uppercase text-amber-500 leading-none">BUDGET TOTAL</span>
+                    <span id="footer-budget-total" class="text-[11px] font-black text-white leading-tight">0 €</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & CONFIG ---
+        const PHASES = [
+            { id: 'proto', name: 'Phase 1 : Prototypage', status: 'Build Prototype', range: [1, 3], color: 'bg-amber-500', icon: 'zap' },
+            { id: 'vs', name: 'Phase 2 : Vertical Slice', status: 'Pre-Alpha', range: [4, 8], color: 'bg-orange-500', icon: 'layout' },
+            { id: 'exp', name: 'Phase 3 : Expansion', status: 'Alpha', range: [9, 18], color: 'bg-yellow-600', icon: 'layers' },
+            { id: 'final', name: 'Phase 4 : Contenu Final', status: 'Beta', range: [19, 24], color: 'bg-amber-600', icon: 'gamepad-2' },
+            { id: 'launch', name: 'Phase 5 : Lancement', status: 'Release', range: [25, 26], color: 'bg-emerald-600', icon: 'rocket' },
+        ];
+
+        const SPRINT_DETAILS = [
+            { id: 1, title: "Mouvement & Grille", desc: "Mise en place de la grille et mouvement par dés." },
+            { id: 2, title: "Noyau du Combat", desc: "Architecture tour par tour et stats figurines." },
+            { id: 3, title: "Boucle Primaire", desc: "Exploration -> Combat -> Récupération." },
+            { id: 4, title: "Blanc-Port 3D", desc: "Modélisation style figurine PBR.", mkt: "Ouverture réseaux sociaux." },
+            { id: 5, title: "Combat 2.0", desc: "Mécanique de Flux et interruptions." },
+            { id: 6, title: "Progression & Grimoire", desc: "Deck-building de sorts et inventaire." },
+            { id: 7, title: "UI & UX Mobile", desc: "HUD final, contrôles tactiles." },
+            { id: 8, title: "Zone 1 : Champs-d'Or", desc: "Intégration biome 1 et équilibrage.", mkt: "Trailer Vertical Slice." },
+            { id: 9, title: "Zone 2 : Forêt", desc: "Biome 'Cents Couteaux'." },
+            { id: 10, title: "Compagnons IA", desc: "Recrutement PNJs et alliés tactiques." },
+            { id: 11, title: "Zone 3 : Pic Enneigé", desc: "Biome 'Pic des Jumeaux'." },
+            { id: 12, title: "Village & Forge", desc: "Amélioration hub et crafting." },
+            { id: 13, title: "Zone 4 : Éther", desc: "Biome 'Bosquet Arbre-Monde'." },
+            { id: 14, title: "Meta Sociale", desc: "Classements et succès.", mkt: "Tests A/B Icônes." },
+            { id: 15, title: "Zone 5 : Métal", desc: "Biome 'Royaume de Khor'." },
+            { id: 16, title: "Événements Aléatoires", desc: "Loteries et rencontres narratives." },
+            { id: 17, title: "Zone 6 : Corruption", desc: "Biome final et distorsion visuelle." },
+            { id: 18, title: "Arène PvP", desc: "Mode duel asynchrone." },
+            { id: 19, title: "Trame Narrative", desc: "Dialogues et cinématiques.", mkt: "Campagne Influenceurs." },
+            { id: 20, title: "Équilibrage Global", desc: "Courbe de puissance et économie.", mkt: "BETA UA." },
+            { id: 21, title: "VFX & Feedback", desc: "Polissage 'Premium' des impacts." },
+            { id: 22, title: "Optimisation & QA", desc: "Réduction du poids." },
+            { id: 23, title: "Localisation", desc: "Traduction et voix IA." },
+            { id: 24, title: "Monétisation", desc: "Boutique et ads.", mkt: "Pré-commandes." },
+            { id: 25, title: "Build Gold", desc: "Soumission stores." },
+            { id: 26, title: "Lancement Live", desc: "Ouverture serveurs.", mkt: "BURST MARKETING." },
+        ];
+
+        const MARKET_SCENARIOS = {
+            fail: { id: 'fail', name: 'Échec / Niche', arpu: 0.12, mau: 4000, decay: 0.55, color: '#f87171' },
+            probable: { id: 'probable', name: 'Succès Indie', arpu: 0.48, mau: 30000, decay: 0.38, color: '#fbbf24' },
+            hit: { id: 'hit', name: 'Hit Global', arpu: 1.45, mau: 150000, decay: 0.25, color: '#fb923c' }
+        };
+
+        const TEMPO_SCENARIOS = {
+            sprint: { reviewRate: 0 },
+            balanced: { reviewRate: 0.5 },
+            june: { reviewRate: 0.88 },
+            security: { reviewRate: 1 }
+        };
+
+        // --- STATE ---
+        let state = {
+            activeTab: 'recap',
+            market: MARKET_SCENARIOS.probable,
+            tempo: 'june',
+            retentionDays: 30,
+            expandedPhase: 'proto',
+            budgetViews: { salary: 'monthly', ia: 'monthly' }
+        };
+
+        // --- CORE LOGIC ---
+        const formatEuro = (v) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+
+        function getCalculations() {
+            const startDate = new Date('2026-01-19');
+            const scenario = TEMPO_SCENARIOS[state.tempo];
+            
+            let current = new Date(startDate);
+            const sprints = SPRINT_DETAILS.map((s, index) => {
+                const start = new Date(current);
+                const sprintEnd = new Date(start);
+                sprintEnd.setDate(start.getDate() + 13);
+                
+                let hasReview = state.tempo === 'june' ? index < 23 : (scenario.reviewRate === 1 ? true : (scenario.reviewRate === 0 ? false : index % 2 === 0));
+                const end = new Date(sprintEnd);
+                if (hasReview) end.setDate(end.getDate() + 7);
+                current = new Date(end);
+                current.setDate(current.getDate() + 1);
+                return { ...s, start, end };
+            });
+
+            const lastEnd = sprints[sprints.length - 1].end;
+            const launchDate = new Date(lastEnd);
+            launchDate.setDate(launchDate.getDate() + 2);
+
+            const totalWeeks = Math.ceil((launchDate - startDate) / (7 * 24 * 60 * 60 * 1000));
+            const totalMonths = totalWeeks / 4.33;
+
+            const monthlySalary = 3900;
+            const iaM = 177;
+            const softM = 225;
+            const mktBase = 12000;
+            const mktUA = 300 * Math.min(6, totalMonths / 2);
+            const mktExtra = 4000;
+            const prod = (monthlySalary + iaM + softM) * totalMonths + 124;
+            const budgetTotal = prod + mktBase + mktUA + mktExtra;
+
+            const mRev = state.market.mau * state.market.arpu;
+            const growth = state.market.id === 'hit' ? 1.12 : (state.market.id === 'probable' ? 1.04 : 0.98);
+            const calcRev = (years) => {
+                let cumulative = 0;
+                let cur = mRev;
+                for (let i = 0; i < years * 12; i++) {
+                    cumulative += cur;
+                    cur *= (1 + (growth - 1) / 12);
+                }
+                return cumulative;
+            };
+
+            return { launchDate, totalWeeks, totalMonths, budgetTotal, mRev, calcRev, sprints, monthlyOp: monthlySalary + iaM + softM };
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`content-${tabId}`).classList.add('active');
+            
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${tabId}`).classList.add('active');
+            render();
+        }
+
+        function updateRetentionChart() {
+            const svg = document.getElementById('retention-svg');
+            const scenario = state.market;
+            const days = state.retentionDays;
+            const k = scenario.decay;
+            
+            let points = [];
+            const step = days > 365 ? 10 : (days > 90 ? 2 : 1);
+            for (let t = 0; t <= days; t += step) {
+                const val = 100 * Math.pow(t + 1, -k);
+                points.push({ x: (t / days) * 100, y: 100 - val });
+            }
+            if (points[points.length - 1].x !== 100) {
+                points.push({ x: 100, y: 100 - (100 * Math.pow(days + 1, -k)) });
+            }
+
+            const pointsStr = points.map(p => `${p.x},${p.y}`).join(' ');
+            document.getElementById('chart-line').setAttribute('points', pointsStr);
+            document.getElementById('chart-area').setAttribute('d', `M 0 100 L ${pointsStr} L 100 100 Z`);
+            document.getElementById('chart-line').setAttribute('stroke', scenario.color);
+        }
+
+        function handleChartInteraction(e) {
+            const svg = document.getElementById('retention-svg');
+            const tooltip = document.getElementById('chart-tooltip');
+            const vLine = document.getElementById('chart-v-line');
+            const cursor = document.getElementById('chart-cursor');
+            const rect = svg.getBoundingClientRect();
+            
+            const xPercent = (e.clientX - rect.left) / rect.width;
+            if (xPercent < 0 || xPercent > 1) {
+                tooltip.style.opacity = '0';
+                vLine.style.opacity = '0';
+                cursor.classList.add('hidden');
+                return;
+            }
+
+            const days = state.retentionDays;
+            const targetDay = Math.round(xPercent * days);
+            const val = 100 * Math.pow(targetDay + 1, -state.market.decay);
+            
+            // UI Updates
+            tooltip.style.opacity = '1';
+            vLine.style.opacity = '0.3';
+            vLine.setAttribute('x1', xPercent * 100);
+            vLine.setAttribute('x2', xPercent * 100);
+            
+            cursor.classList.remove('hidden');
+            cursor.style.opacity = '1';
+            cursor.setAttribute('cx', xPercent * 100);
+            cursor.setAttribute('cy', 100 - val);
+            
+            document.getElementById('tooltip-day').innerText = targetDay >= 365 ? `~ ${(targetDay/365).toFixed(1)} an(s)` : `Jour ${targetDay}`;
+            document.getElementById('tooltip-val').innerText = val.toFixed(1) + '%';
+            
+            // Positioning tooltip
+            const tooltipX = e.clientX - rect.left + 15;
+            const tooltipY = e.clientY - rect.top - 40;
+            tooltip.style.left = Math.min(tooltipX, rect.width - 100) + 'px';
+            tooltip.style.top = Math.max(tooltipY, 0) + 'px';
+        }
+
+        function renderProjections() {
+            const calcs = getCalculations();
+            const projData = [
+                { label: "1er Mois", val: calcs.mRev },
+                { label: "An 1", val: calcs.calcRev(1) },
+                { label: "An 2", val: calcs.calcRev(2) },
+                { label: "An 5", val: calcs.calcRev(5) },
+                { label: "An 10", val: calcs.calcRev(10) }
+            ];
+            
+            const grid = document.getElementById('projections-grid');
+            grid.innerHTML = projData.map(p => `
+                <div class="p-8 bg-white/[0.02] rounded-[2rem] border border-white/5 text-center hover:bg-amber-500/5 transition-all">
+                    <p class="text-[10px] text-slate-500 font-black uppercase mb-3 tracking-widest italic">${p.label}</p>
+                    <p class="text-2xl font-black text-white tracking-tighter">${formatEuro(p.val)}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderBudget() {
+            const calcs = getCalculations();
+            const container = document.getElementById('budget-cards-container');
+            
+            const mult = (v) => v === 'monthly' ? 1 : v === 'yearly' ? 12 : calcs.totalMonths;
+
+            const cards = [
+                { id: 'salary', title: 'Salaires', icon: 'wallet', color: 'text-emerald-400', items: [
+                    { n: 'Net (Cible)', v: 2100 }, { n: 'Cotisations', v: 1800, isRed: true }
+                ], total: 3900 },
+                { id: 'ia', title: 'Stack IA', icon: 'cpu', color: 'text-amber-500', items: [
+                    { n: 'Meshy AI', v: 16 }, { n: 'ElevenLabs', v: 22 }, { n: 'DeepMotion', v: 19 }, { n: 'Unity Pro', v: 150 }, { n: 'Gemini Pro', v: 40 }
+                ], total: 247 + 150 }
+            ];
+
+            container.innerHTML = cards.map(c => {
+                const curMult = mult(state.budgetViews[c.id]);
+                return `
+                <div class="p-10 glass-card rounded-[3rem] shadow-xl flex flex-col group hover:border-amber-500/30 transition-all">
+                    <h3 class="text-sm font-black uppercase italic ${c.color} flex items-center gap-2 mb-10"><i data-lucide="${c.icon}" class="w-4 h-4"></i> ${c.title}</h3>
+                    <div class="space-y-4 mb-6 flex-1 text-sm">
+                        ${c.items.map(it => `
+                            <div class="flex justify-between font-bold border-b border-white/5 pb-2">
+                                <span class="text-slate-500 italic">${it.n}</span>
+                                <span class="${it.isRed ? 'text-red-400/70' : 'text-white'}">${formatEuro(it.v * curMult)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex flex-col gap-6 pt-6 border-t border-amber-500/10">
+                        <div class="flex flex-col items-center gap-2">
+                             <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Options de vue</span>
+                             <div class="flex bg-white/5 p-1 rounded-xl border border-white/10 w-fit">
+                                ${['monthly', 'yearly', 'total'].map(m => `
+                                    <button onclick="state.budgetViews.${c.id}='${m}'; render();" class="px-3 py-1.5 text-[8px] uppercase font-black tracking-widest rounded-lg transition-all ${state.budgetViews[c.id] === m ? 'bg-amber-600 text-white' : 'text-slate-500'}">
+                                        ${m === 'monthly' ? 'Mois' : m === 'yearly' ? 'An' : 'Projet'}
+                                    </button>
+                                `).join('')}
+                             </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] uppercase font-black text-slate-400">Total</span>
+                            <span class="text-3xl font-black text-white">${formatEuro(c.total * curMult)}</span>
+                        </div>
+                    </div>
+                </div>
+                `
+            }).join('') + `
+            <div class="p-10 glass-card rounded-[3rem] shadow-xl flex flex-col group hover:border-amber-500/30 transition-all">
+                <h3 class="text-sm font-black uppercase italic text-orange-400 mb-10 flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4"></i> Marketing</h3>
+                <div class="space-y-4 mb-10 flex-1 text-sm">
+                    <div class="flex justify-between font-bold border-b border-white/5 pb-2"><span class="text-slate-500 italic">Campagne Burst</span><span class="text-white">${formatEuro(12000)}</span></div>
+                    <div class="flex justify-between font-bold border-b border-white/5 pb-2"><span class="text-slate-500 italic">UA & ASO</span><span class="text-white">${formatEuro(300 * Math.min(6, calcs.totalMonths / 2))}</span></div>
+                    <div class="flex justify-between font-bold border-b border-white/5 pb-2"><span class="text-slate-500 italic">Influenceurs</span><span class="text-white">${formatEuro(4000)}</span></div>
+                </div>
+                <div class="pt-8 border-t border-amber-500/10 flex justify-between items-center mt-auto">
+                    <span class="text-[10px] uppercase font-black text-slate-400">Total Lancement</span>
+                    <span class="text-3xl font-black text-orange-400">${formatEuro(12000 + 4000 + 300 * Math.min(6, calcs.totalMonths / 2))}</span>
+                </div>
+            </div>`;
+            lucide.createIcons();
+        }
+
+        function renderPlanning() {
+            const calcs = getCalculations();
+            const container = document.getElementById('phases-container');
+            
+            container.innerHTML = PHASES.map(phase => {
+                const isExpanded = state.expandedPhase === phase.id;
+                const phaseSprints = calcs.sprints.slice(phase.range[0]-1, phase.range[1]);
+                
+                return `
+                <div class="rounded-[3.5rem] border transition-all duration-500 overflow-hidden ${isExpanded ? 'bg-slate-900/60 border-amber-500/30 shadow-2xl backdrop-blur-md' : 'border-amber-500/10 bg-transparent'}">
+                    <button onclick="state.expandedPhase = '${isExpanded ? '' : phase.id}'; render();" class="w-full flex items-center justify-between p-10 group text-left">
+                        <div class="flex items-center gap-10">
+                            <div class="p-6 rounded-3xl ${phase.color} bg-opacity-20 text-${phase.color.split('-')[1]}-500 group-hover:scale-110 transition-transform shadow-xl shadow-black/40"><i data-lucide="${phase.icon}" class="w-8 h-8"></i></div>
+                            <div>
+                                <h3 class="font-black text-3xl uppercase italic tracking-tighter text-white mb-1">${phase.name}</h3>
+                                <span class="text-[11px] font-black uppercase tracking-[0.3em] text-${phase.color.split('-')[1]}-500">${phase.status}</span>
+                            </div>
+                        </div>
+                        <i data-lucide="${isExpanded ? 'chevron-down' : 'chevron-right'}" class="w-8 h-8 text-slate-500"></i>
+                    </button>
+                    ${isExpanded ? `
+                        <div class="px-10 pb-12 space-y-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                ${phaseSprints.map((s, idx) => `
+                                    <div class="p-8 rounded-[2.5rem] border transition-all relative overflow-hidden group/sprint ${s.mkt ? 'bg-amber-600/5 border-amber-500/20' : 'bg-slate-900/60 border-white/5 hover:border-amber-500/10'}">
+                                        <div class="flex justify-between items-center mb-4">
+                                            <div class="text-[10px] font-black uppercase tracking-widest text-slate-600 italic">Sprint ${phase.range[0]+idx}</div>
+                                            ${s.mkt ? '<i data-lucide="megaphone" class="text-amber-500 animate-pulse w-3 h-3"></i>' : ''}
+                                        </div>
+                                        <h4 class="font-black text-lg text-white mb-3 uppercase italic tracking-tight">${s.title}</h4>
+                                        <p class="text-[11px] text-slate-500 leading-relaxed font-medium mb-6">${s.desc}</p>
+                                        <div class="text-[9px] font-black text-amber-500/60 uppercase tracking-widest mb-6 flex items-center gap-2 italic"><i data-lucide="calendar" class="w-3 h-3"></i> ${s.start.toLocaleDateString('fr-FR')} — ${s.end.toLocaleDateString('fr-FR')}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function render() {
+            const calcs = getCalculations();
+            
+            // Header & Footer
+            document.getElementById('launch-date-display').innerText = calcs.launchDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+            document.getElementById('footer-ca-y1').innerText = formatEuro(calcs.calcRev(1));
+            document.getElementById('footer-budget-total').innerText = formatEuro(calcs.budgetTotal);
+
+            // Recap Tab
+            document.getElementById('recap-budget-total').innerText = formatEuro(calcs.budgetTotal);
+            document.getElementById('recap-projections-y1').innerText = formatEuro(calcs.calcRev(1));
+            document.getElementById('recap-burn-rate').innerText = formatEuro(calcs.monthlyOp) + '/m';
+            document.getElementById('recap-weeks').innerText = calcs.totalWeeks + ' semaines';
+
+            // Market Tab
+            document.getElementById('retention-days-display').innerText = state.retentionDays >= 365 ? (state.retentionDays/365).toFixed(1) + ' Ans' : state.retentionDays + ' Jours';
+            updateRetentionChart();
+            renderProjections();
+
+            // Planning Tab
+            renderPlanning();
+
+            // Budget Tab
+            renderBudget();
+            
+            lucide.createIcons();
+        }
+
+        // --- LISTENERS ---
+        document.getElementById('market-select').addEventListener('change', (e) => {
+            state.market = MARKET_SCENARIOS[e.target.value];
+            document.getElementById('market-scenario-label').innerText = state.market.name;
+            render();
+        });
+
+        document.getElementById('tempo-select').addEventListener('change', (e) => {
+            state.tempo = e.target.value;
+            render();
+        });
+
+        document.getElementById('retention-range').addEventListener('input', (e) => {
+            state.retentionDays = parseInt(e.target.value);
+            document.getElementById('retention-days-display').innerText = state.retentionDays >= 365 ? (state.retentionDays/365).toFixed(1) + ' Ans' : state.retentionDays + ' Jours';
+            updateRetentionChart();
+        });
+
+        document.getElementById('retention-svg').addEventListener('mousemove', handleChartInteraction);
+        document.getElementById('retention-svg').addEventListener('mouseleave', () => {
+            document.getElementById('chart-tooltip').style.opacity = '0';
+            document.getElementById('chart-v-line').style.opacity = '0';
+            document.getElementById('chart-cursor').classList.add('hidden');
+        });
+
+        // Initialize
+        window.onload = () => {
+            render();
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
