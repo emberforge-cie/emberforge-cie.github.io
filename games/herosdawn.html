@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero's Dawn - L'Aube de Nyr | EmberForge Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600;700;800;900&display=swap');
+        
+        :root {
+            --brand-dark: #020617;
+            --brand-amber: #fbbf24;
+            --brand-orange: #ea580c;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--brand-dark);
+            color: #f8fafc;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, h4, .font-fantasy { font-family: 'Cinzel', serif; }
+
+        .title-gradient {
+            background: linear-gradient(135deg, #f8fafc 0%, var(--brand-amber) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-nav {
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(251, 191, 36, 0.1);
+        }
+
+        .dropdown-card {
+            background: rgba(10, 15, 30, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .group:hover .dropdown-card {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-link:hover { color: var(--brand-amber); }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 0;
+            width: 0; height: 1px;
+            background: var(--brand-amber);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        @keyframes dawn-pulse {
+            0%, 100% { opacity: 0.1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.1); }
+        }
+        .dawn-glow {
+            position: fixed;
+            width: 90vw;
+            height: 90vw;
+            background: radial-gradient(circle, var(--brand-amber) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(100px);
+            animation: dawn-pulse 12s ease-in-out infinite;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(251, 191, 36, 0.1);
+        }
+
+        .mobile-overlay {
+            transform: translateX(100%);
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .mobile-overlay.active { transform: translateX(0); }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dust-particle {
+            position: absolute;
+            background: var(--brand-amber);
+            border-radius: 50%;
+            opacity: 0.15;
+            pointer-events: none;
+            filter: blur(1px);
+            animation: float-dust linear infinite;
+        }
+
+        @keyframes float-dust {
+            from { transform: translateY(100vh) rotate(0deg); }
+            to { transform: translateY(-10vh) rotate(360deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+
+        .biome-card {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+        .biome-card:hover {
+            transform: translateY(-5px);
+            background: rgba(251, 191, 36, 0.1);
+            border-color: rgba(251, 191, 36, 0.4);
+        }
+
+        .modal-scroll::-webkit-scrollbar { width: 4px; }
+        .modal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .modal-scroll::-webkit-scrollbar-thumb { background: var(--brand-amber); border-radius: 10px; }
+
+        .image-placeholder {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border: 1px solid rgba(251, 191, 36, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1.5rem;
+            color: rgba(251, 191, 36, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .biome-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+        .image-placeholder:hover .biome-image {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="selection:bg-amber-500/30">
+
+    <div class="dawn-glow top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+    <div id="dust-container" class="fixed inset-0 pointer-events-none z-10"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full z-[150] px-6 py-4 md:px-12 flex justify-between items-center glass-nav">
+        <div class="flex items-center gap-4 group cursor-pointer">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-amber-400 to-orange-600 rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+                <i data-lucide="deer" class="text-slate-950 w-6 h-6 md:w-7 md:h-7"></i>
+            </div>
+            <div class="flex flex-col text-left">
+                <span class="font-inter font-black uppercase tracking-[0.3em] text-sm md:text-lg leading-none">EmberForge</span>
+                <span class="text-[7px] font-bold uppercase tracking-[0.4em] text-amber-500 opacity-60 italic">Indie Studio</span>
+            </div>
+        </div>
+
+        <div class="hidden md:flex gap-10 items-center text-[9px] font-black uppercase tracking-[0.2em] text-slate-300">
+            <!-- Nos Jeux -->
+            <div class="group relative py-2">
+                <button class="nav-link flex items-center gap-2">Nos Jeux <i data-lucide="chevron-down" class="w-3 h-3 text-amber-500/50"></i></button>
+                <div class="dropdown-card absolute top-full left-0 w-64 rounded-2xl p-5 mt-2">
+                    <div class="space-y-4 text-left">
+                        <a href="#" class="flex flex-col group/item">
+                            <span class="text-[10px] text-amber-500 tracking-widest font-bold uppercase underline">Hero's Dawn</span>
+                            <span class="text-[7px] opacity-40 uppercase tracking-[0.2em] font-medium italic mt-1">Tactique Mobile</span>
+                        </a>
+                        <a href="phoenixflames.html" class="flex flex-col group/item">
+                            <span class="text-[10px] text-white group-hover/item:text-amber-500 transition-colors tracking-widest font-bold uppercase">Phoenix Flames</span>
+                            <span class="text-[7px] opacity-40 uppercase tracking-[0.2em] font-medium italic mt-1">Action-Aventure PC</span>
+                        </a>
+                        <a href="tou.html" class="flex flex-col group/item">
+                            <span class="text-[10px] text-white group-hover/item:text-amber-500 transition-colors tracking-widest font-bold uppercase">Two of Us</span>
+                            <span class="text-[7px] opacity-40 uppercase tracking-[0.2em] font-medium italic mt-1">Coopératif Narratif</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group relative py-2 text-left">
+                <button class="nav-link flex items-center gap-2">Contes de Nyr <i data-lucide="chevron-down" class="w-3 h-3 text-amber-500/50"></i></button>
+                <div class="dropdown-card absolute top-full left-0 w-60 rounded-2xl p-5 mt-2 text-left">
+                    <div class="space-y-4 text-left">
+                        <a href="../atlas//encyclopedie.html" class="flex items-center gap-3 group/item">
+                            <i data-lucide="book-open" class="w-3.5 h-3.5 text-amber-500 opacity-30"></i>
+                            <span class="text-[10px] text-white group-hover/item:text-amber-500 transition-colors tracking-widest uppercase text-[7px]">Encyclopédie</span>
+                        </a>
+                        <a href="../atlas/world_map.html" class="flex items-center gap-3 group/item">
+                            <i data-lucide="map" class="w-3.5 h-3.5 text-amber-500 opacity-30"></i>
+                            <span class="text-[10px] text-white group-hover/item:text-amber-500 transition-colors tracking-widest uppercase text-[7px]">Carte du monde</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <a href="../studio.html" class="nav-link">Le Studio</a>
+        </div>
+
+        <button onclick="toggleMenu()" class="md:hidden text-amber-500 p-2">
+            <i data-lucide="menu" class="w-7 h-7"></i>
+        </button>
+    </nav>
+
+    <!-- MENU MOBILE -->
+    <div id="mobileOverlay" class="mobile-overlay fixed inset-0 z-[200] bg-slate-950 flex flex-col p-10 overflow-y-auto">
+        <div class="flex justify-between items-center mb-16">
+            <i data-lucide="sun" class="w-8 h-8 text-amber-500"></i>
+            <button onclick="toggleMenu()"><i data-lucide="x" class="w-10 h-10 text-white"></i></button>
+        </div>
+        <div class="space-y-12 text-left">
+            <div>
+                <h4 class="text-amber-500 text-[8px] font-black uppercase tracking-[0.4em] mb-6 opacity-50 italic text-left">Nos Jeux</h4>
+                <div class="flex flex-col gap-6 text-3xl font-fantasy italic uppercase text-left">
+                    <a href="#" class="text-amber-500" onclick="toggleMenu()">Hero's Dawn</a>
+                    <a href="phoenixflames.html" onclick="toggleMenu()">Phoenix Flames</a>
+                    <a href="tou.html" onclick="toggleMenu()">Two of Us</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-amber-500 text-[8px] font-black uppercase tracking-[0.4em] mb-6 opacity-50 italic text-left">Les Contes de Nyr</h4>
+                <div class="flex flex-col gap-4 text-2xl font-fantasy italic uppercase text-left">
+                    <a href="#" onclick="toggleMenu()">Encyclopédie</a>
+                    <a href="#" onclick="toggleMenu()">Carte du monde</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section class="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 relative">
+        <div class="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none"></div>
+        <i data-lucide="deer" class="w-64 h-64 text-slate-800/10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>
+        
+        <div class="relative z-10 max-w-5xl space-y-8 mx-auto">
+            <div class="w-16 h-16 md:w-20 md:h-20 bg-amber-500/10 rounded-3xl mx-auto flex items-center justify-center border border-amber-500/20 animate-float">
+                <i data-lucide="hammer" class="w-8 h-8 md:w-10 md:h-10 text-amber-500/60"></i>
+            </div>
+            <h1 class="text-5xl sm:text-7xl md:text-8xl lg:text-[9rem] font-black uppercase tracking-tighter leading-[1.1] title-gradient italic max-w-full mx-auto overflow-visible">Hero's Dawn</h1>
+            <div class="h-px w-24 md:w-32 bg-amber-500/30 mx-auto"></div>
+            <p class="text-slate-400 text-sm md:text-2xl lg:text-3xl font-light italic leading-relaxed max-w-3xl mx-auto px-4">
+                "Le destin d'un monde repose entre vos mains. Éveillez l'aube ancienne et parcourez les terres de Nyr."
+            </p>
+            
+            <div class="flex flex-wrap items-center justify-center gap-4 mt-8">
+                <div class="flex items-center gap-3 px-6 py-2 glass-panel rounded-full border-amber-500/20">
+                    <span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#fbbf24]"></span>
+                    <span class="text-[9px] font-black uppercase tracking-[0.3em] text-amber-500 italic">Sortie le 29 Juin 2027</span>
+                </div>
+            </div>
+
+            <div class="pt-10">
+                <a href="#prologue" class="inline-flex items-center gap-4 px-10 py-5 bg-amber-500 text-slate-950 font-black uppercase tracking-widest text-[10px] rounded-full hover:scale-105 transition-all shadow-[0_0_30px_rgba(251,191,36,0.3)]">
+                    Découvrir l'Aube <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROLOGUE : L'UNIVERS -->
+    <section id="prologue" class="py-32 md:py-64 px-6 reveal">
+        <div class="max-w-4xl mx-auto text-center space-y-12">
+            <span class="text-amber-500 font-black uppercase tracking-[0.5em] text-[10px] italic block">Système 01 // Tales of Nyr</span>
+            <h2 class="text-4xl md:text-7xl font-black uppercase italic leading-tight text-center">Les Terres de Nyr</h2>
+            <p class="text-slate-400 text-xl md:text-2xl italic font-light leading-relaxed max-w-3xl mx-auto">
+                Des pics gelés des Jumeaux aux cités naines du Royaume Souterrain, le monde est un diorama tactile où chaque node révèle un fragment du passé de Nyr. Incarnez un aventurier face à la corruption rampante.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 text-left">
+                <div class="glass-panel p-10 rounded-[3rem] space-y-4 border-l-4 border-l-amber-500 group hover:bg-amber-500/5 transition-all">
+                    <i data-lucide="map" class="text-amber-500 w-8 h-8"></i>
+                    <h4 class="text-white font-black uppercase text-[10px] tracking-widest italic text-left">Diorama Tactile</h4>
+                    <p class="text-slate-500 text-[11px] italic leading-relaxed text-left">Une structure de jeu de plateau assumée. Déplacez-vous sur un plateau miniature tangible où la stratégie prime sur le défilement.</p>
+                </div>
+                <div class="glass-panel p-10 rounded-[3rem] space-y-4 border-l-4 border-l-orange-500 group hover:bg-orange-500/5 transition-all">
+                    <i data-lucide="zap" class="text-orange-500 w-8 h-8"></i>
+                    <h4 class="text-white font-black uppercase text-[10px] tracking-widest italic text-left">Timeline Dynamique</h4>
+                    <p class="text-slate-500 text-[11px] italic leading-relaxed text-left">Le temps est une ressource finie. Anticipez et interrompez les actions ennemies sur une chronologie circulaire en temps réel.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ATLAS PREVIEW : CLIQUEZ SUR UNE ZONE -->
+    <section id="atlas" class="py-24 md:py-48 border-t border-white/5 reveal">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16 space-y-4">
+                <h2 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter italic text-center">L'Atlas de Nyr</h2>
+                <p class="text-slate-500 italic uppercase tracking-[0.5em] text-[10px] text-center">Explorez les Sept Biomes | Cliquez pour en savoir plus</p>
+            </div>
+            <div id="biome-container" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                <!-- Généré par JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-32 border-t border-white/5 bg-slate-950/60 text-center space-y-12">
+        <div class="flex flex-col items-center gap-6">
+            <div class="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center shadow-2xl animate-float">
+                <i data-lucide="sun" class="text-slate-950 w-8 h-8"></i>
+            </div>
+            <h2 class="text-3xl font-black uppercase italic tracking-[0.3em]">Hero's Dawn</h2>
+            <div class="flex flex-wrap justify-center gap-8 text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 italic px-6">
+                <span>Tactique Mobile</span>
+                <span>•</span>
+                <span>Q2 2027</span>
+                <span>•</span>
+                <span>EmberForge Studio</span>
+            </div>
+        </div>
+        
+        <div class="pt-12 flex justify-center gap-8 border-t border-white/5 max-w-2xl mx-auto opacity-30">
+            <a href="../studio.html" class="text-[9px] font-black uppercase tracking-widest hover:text-amber-500 transition-colors italic flex items-center gap-2">
+                <i data-lucide="arrow-left" class="w-3 h-3"></i> Retour au Studio
+            </a>
+        </div>
+        <div class="text-[8px] font-bold uppercase tracking-[0.5em] text-slate-800 italic">
+            © 2026 EMBERFORGE STUDIO • TOUS DROITS RÉSERVÉS
+        </div>
+    </footer>
+
+    <!-- MODAL ATLAS -->
+    <div id="biome-modal" class="fixed inset-0 z-[500] bg-slate-950/98 backdrop-blur-xl hidden flex items-center justify-center p-4 md:p-12" onclick="closeModal()">
+        <div class="glass-panel w-full max-w-5xl rounded-[3rem] p-6 md:p-16 relative overflow-hidden shadow-2xl border-amber-500/20" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute top-6 right-6 w-10 h-10 glass-panel rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div id="modal-content" class="max-h-[80vh] overflow-y-auto pr-2 modal-scroll">
+                <!-- Contenu dynamique -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DONNÉES DES BIOMES AVEC IMAGES (URLs à remplacer par tes vrais concepts arts)
+        const BIOMES = [
+            { 
+                id: 1, 
+                name: "Champs-d'Or", 
+                icon: "wheat", 
+                color: "text-amber-500", 
+                desc: "Plaines ocre éternelles et moulins hantés.", 
+                lore: "Le berceau de l'humanité, où le blé brille d'un éclat solaire même en pleine nuit. C'est ici que l'aventurier commence son épopée.", 
+                tech: "Rendu PBR 2.0 | Lumière volumétrique",
+                image: "assets/herosdawn/champdor.png"
+            },
+            { 
+                id: 2, 
+                name: "Cents Couteaux", 
+                icon: "trees", 
+                color: "text-emerald-500", 
+                desc: "Forêt dense aux feuilles tranchantes comme l'acier.", 
+                lore: "Une jungle impénétrable où la végétation a fusionné avec le fer ancien. Un labyrinthe de dangers pour les imprudents.", 
+                tech: "Occlusion Ambiante | Particules de sève",
+                image: "assets/herosdawn/centscouteaux.jpg"
+            },
+            { 
+                id: 3, 
+                name: "Pic Jumeaux", 
+                icon: "mountain", 
+                color: "text-blue-400", 
+                desc: "Sommets glacés et majesté souterraine.", 
+                lore: "Le royaume des nains et des gardiens de la terre. Les pics touchent l'éther tandis que les mines descendent vers le noyau.", 
+                tech: "Shader de Glace | Brume dynamique",
+                image: "assets/herosdawn/picjumeaux.jpg"
+            },
+            { 
+                id: 4, 
+                name: "Arbre-Monde", 
+                icon: "sprout", 
+                color: "text-purple-400", 
+                desc: "Le sanctuaire sacré où le Flux prend racine.", 
+                lore: "Le cœur spirituel de Nyr. On dit que ses racines relient les dimensions. Un lieu de calme avant la tempête.", 
+                tech: "Lueurs Bio-luminescentes",
+                image: "assets/herosdawn/arbremonde.jpg"
+            },
+            { 
+                id: 5, 
+                name: "Royaume Khor", 
+                icon: "flame", 
+                color: "text-orange-500", 
+                desc: "Forges ancestrales et fleuves de métal.", 
+                lore: "Le domaine des Forgerons. L'endroit où toutes les armes légendaires ont été frappées au marteau divin.", 
+                tech: "Heat Distortion | Bloom",
+                image: "assets/herosdawn/khor.jpg"
+            },
+            { 
+                id: 6, 
+                name: "Confins", 
+                icon: "skull", 
+                color: "text-red-500", 
+                desc: "Le néant où la réalité s'effondre.", 
+                lore: "Là où la corruption a gagné. Le plateau de jeu se brise et les règles de la physique ne s'appliquent plus.", 
+                tech: "Glitch Shaders | Chaos Math",
+                image: "assets/herosdawn/confins.jpg"
+            },
+            { 
+                id: 7, 
+                name: "Blanc-Port", 
+                icon: "anchor", 
+                color: "text-slate-400", 
+                desc: "Dernier refuge sécurisé face à l'Oubli.", 
+                lore: "Une cité flottante qui sert de hub social pour tous les voyageurs. C'est ici que la résistance s'organise.", 
+                tech: "Reflets Temps-Réel (Planar)",
+                image: "assets/herosdawn/blancport.jpg  "
+            }
+        ];
+
+        function renderBiomes() {
+            const container = document.getElementById('biome-container');
+            if(!container) return;
+            container.innerHTML = BIOMES.map((b, i) => `
+                <div onclick="openBiomeModal(${i})" class="glass-panel p-6 rounded-3xl text-center biome-card group">
+                    <i data-lucide="${b.icon}" class="w-6 h-6 ${b.color} mx-auto mb-3 opacity-40 group-hover:opacity-100 transition-opacity"></i>
+                    <span class="text-[8px] font-black uppercase tracking-widest text-white italic text-center block">${b.name}</span>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function openBiomeModal(index) {
+            const b = BIOMES[index];
+            const content = document.getElementById('modal-content');
+            
+            // On construit le HTML du modal en incluant l'image
+            content.innerHTML = `
+                <div class="space-y-12">
+                    <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12 text-center md:text-left">
+                        <div class="w-24 h-24 md:w-32 md:h-32 glass-panel rounded-[2rem] flex items-center justify-center ${b.color} border-white/10 shadow-xl">
+                            <i data-lucide="${b.icon}" class="w-12 h-12 md:w-16 md:h-16"></i>
+                        </div>
+                        <div class="space-y-2">
+                            <span class="text-xs font-black uppercase tracking-[0.5em] ${b.color} italic block">Atlas de Nyr // Zone 0${b.id}</span>
+                            <h3 class="text-4xl md:text-7xl font-black uppercase italic text-white tracking-tighter leading-none">${b.name}</h3>
+                        </div>
+                    </div>
+                    
+                    <!-- Zone Image Concept Art -->
+                    <div class="w-full h-48 md:h-96 image-placeholder group">
+                        <img 
+                            src="${b.image}" 
+                            alt="Concept Art de ${b.name}" 
+                            class="biome-image"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                        >
+                        <!-- Fallback si l'image ne charge pas -->
+                        <div class="hidden absolute inset-0 flex flex-col items-center justify-center text-center space-y-4">
+                            <i data-lucide="image-off" class="w-12 h-12 mx-auto opacity-40"></i>
+                            <span class="text-[10px] uppercase font-black tracking-widest opacity-40 italic">[ Image non disponible : ${b.name} ]</span>
+                        </div>
+                        <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/80 to-transparent pointer-events-none"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-left">
+                        <div class="space-y-6">
+                            <h4 class="text-amber-500 font-black uppercase text-xs tracking-widest italic border-b border-white/10 pb-2 text-left">Récit du Monde</h4>
+                            <p class="text-slate-300 text-lg md:text-2xl font-light italic leading-relaxed text-left">
+                                "${b.lore}"
+                            </p>
+                        </div>
+                        <div class="space-y-6">
+                            <h4 class="text-amber-500 font-black uppercase text-xs tracking-widest italic border-b border-white/10 pb-2 text-left">Détails Techniques</h4>
+                            <div class="bg-white/5 rounded-2xl p-6 border border-white/5">
+                                <ul class="text-slate-400 text-xs space-y-3 italic text-left">
+                                    <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-amber-500"></i> ${b.tech}</li>
+                                    <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-amber-500"></i> Géométrie de node unique</li>
+                                    <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-amber-500"></i> Ambiance sonore immersive</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('biome-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('biome-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function createDust() {
+            const container = document.getElementById('dust-container');
+            if(!container) return;
+            const particle = document.createElement('div');
+            particle.className = 'dust-particle';
+            const size = Math.random() * 4 + 1 + 'px';
+            particle.style.width = size;
+            particle.style.height = size;
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDuration = Math.random() * 4 + 6 + 's';
+            particle.style.opacity = Math.random() * 0.3;
+            container.appendChild(particle);
+            setTimeout(() => { particle.remove(); }, 10000);
+        }
+
+        setInterval(createDust, 300);
+
+        function toggleMenu() {
+            const menu = document.getElementById('mobileOverlay');
+            menu.classList.toggle('active');
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        window.onload = () => {
+            renderBiomes();
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>

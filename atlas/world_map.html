@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas de Nyr - Carte Tactique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600;700;800;900&display=swap');
+        
+        :root {
+            --brand-dark: #020617;
+            --brand-amber: #fbbf24;
+            --brand-orange: #ea580c;
+            --brand-slate: #1e293b;
+            --brand-purple: #a855f7;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--brand-dark);
+            color: #f8fafc;
+            overflow: hidden;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1, h2, h3, h4, .font-fantasy { font-family: 'Cinzel', serif; }
+
+        .map-grid {
+            background-image: 
+                linear-gradient(rgba(251, 191, 36, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(251, 191, 36, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        /* Continent Shards */
+        .continent-container {
+            position: relative;
+            width: 1200px;
+            height: 800px;
+            z-index: 10;
+        }
+
+        /* Zones Shards - Puzzle Organique */
+        .zone-shard {
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            stroke-width: 2;
+            stroke: rgba(255, 255, 255, 0.08);
+            paint-order: stroke fill;
+            /* Création de l'espacement entre les zones */
+            transform: scale(0.985); 
+            transform-origin: center;
+            transform-box: fill-box;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        }
+
+        .zone-shard:hover {
+            filter: brightness(1.3) drop-shadow(0 0 25px currentColor);
+            stroke: rgba(255, 255, 255, 0.5);
+            stroke-width: 3;
+            transform: scale(1.015);
+            z-index: 50;
+        }
+
+        .world-tree-shard {
+            fill: rgba(168, 85, 247, 0.3);
+            stroke: var(--brand-purple);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.4));
+            transform: scale(0.97, 0.99); 
+        }
+
+        .zone-label-box {
+            position: absolute;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            z-index: 100;
+            opacity: 0.85;
+        }
+
+        /* Modal / Details Panel */
+        .details-panel {
+            background: rgba(8, 12, 24, 0.98);
+            backdrop-filter: blur(40px);
+            border-left: 1px solid rgba(251, 191, 36, 0.15);
+            transform: translateX(100%);
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: -40px 0 80px rgba(0,0,0,1);
+        }
+
+        .details-panel.active { transform: translateX(0); }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--brand-amber); border-radius: 10px; }
+
+        /* Creature Cards */
+        .creature-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1.5rem;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .creature-card:hover {
+            background: rgba(251, 191, 36, 0.05);
+            border-color: rgba(251, 191, 36, 0.2);
+            transform: translateX(10px);
+        }
+
+        @keyframes scan { from { top: -100px; } to { top: 100%; } }
+        .scanline {
+            width: 100%; height: 100px;
+            background: linear-gradient(to bottom, transparent, rgba(251, 191, 36, 0.01), transparent);
+            position: absolute; top: -100px; left: 0;
+            animation: scan 15s linear infinite; pointer-events: none;
+        }
+    </style>
+</head>
+<body class="selection:bg-amber-500/20">
+
+    <div class="map-grid"></div>
+    <div class="scanline"></div>
+
+    <header class="fixed top-0 left-0 w-full p-8 z-[150] flex justify-between items-center pointer-events-none">
+        <div class="flex items-center gap-5 pointer-events-auto">
+            <div class="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center shadow-2xl border border-white/20">
+                <i data-lucide="map" class="text-slate-950 w-8 h-8"></i>
+            </div>
+            <div class="flex flex-col text-left">
+                <h1 class="font-inter font-black uppercase tracking-[0.4em] text-2xl leading-none text-white">Atlas de Nyr</h1>
+                <span class="text-[9px] font-bold uppercase tracking-[0.5em] text-amber-500 opacity-70 italic mt-1">Secteur Continentale • Forge v6.1</span>
+            </div>
+        </div>
+        <div class="flex gap-4 pointer-events-auto">
+            <!-- <button onclick="resetView()" class="p-4 bg-white/5 border border-white/10 rounded-full hover:bg-amber-500/20 transition-all">
+                <i data-lucide="refresh-cw" class="w-5 h-5 text-amber-500"></i>
+            </button> -->
+            <a href="../studio.html" class="px-8 py-4 bg-slate-900/40 backdrop-blur rounded-full text-[11px] font-black uppercase tracking-[0.3em] text-slate-300 border border-white/10 hover:text-amber-500 transition-all shadow-xl">
+                Quitter l'Atlas
+            </a>
+        </div>
+    </header>
+
+    <div class="continent-container flex items-center justify-center">
+        <div id="map-world" class="relative w-[1200px] h-[800px] transition-transform duration-1000 scale-[0.6] lg:scale-95">
+            <svg viewBox="0 0 1200 800" class="absolute inset-0 w-full h-full z-10">
+                <!-- SHARDS DE ZONE - DÉCOUPAGE ORGANIQUE SANS CONTOUR GLOBAL -->
+                
+                <!-- 1. BLANC-PORT (Nord-Ouest) -->
+                <path onclick="selectBiome(6)" class="zone-shard fill-slate-800/80 text-slate-400" d="
+                    M 110,160 Q 80,250 105,340 L 380,300 Q 360,180 380,75 Q 150,110 110,160 Z" />
+                
+                <!-- 2. CHAMP-D'OR (Est de Blanc-Port, Ouest de l'Arbre) -->
+                <path onclick="selectBiome(0)" class="zone-shard fill-amber-600/50 text-amber-500" d="
+                    M 380,75 Q 550,60 680,65 L 680,280 Q 500,300 380,300 L 380,75 Z" />
+                
+                <!-- 3. LES CENTS COUTEAUX (Sud des Champs-d'Or) -->
+                <path onclick="selectBiome(1)" class="zone-shard fill-emerald-700/50 text-emerald-500" d="
+                    M 105,340 L 380,300 L 680,300 L 680,520 Q 400,530 100,500 L 95,450 L 105,340 Z" />
+                
+                <!-- 4. PIC-JUMEAUX (Directement Sud des Cents Couteaux) -->
+                <path onclick="selectBiome(2)" class="zone-shard fill-blue-700/50 text-blue-400" d="
+                    M 100,500 Q 400,530 680,520 L 680,760 Q 350,780 120,640 Q 200,720 100,650 L 100,500 Z" />
+                
+                <!-- 5. ARBRE-MONDE (Rectangle Central / Colonne) -->
+                <path onclick="selectBiome(3)" class="zone-shard world-tree-shard text-purple-400" d="
+                    M 680,65 Q 730,55 775,60 L 775,750 Q 720,760 680,760 L 680,65 Z" />
+                
+                <!-- 6. ROYAUME DE KHOR (Nord-Est - Est de l'Arbre) -->
+                <path onclick="selectBiome(4)" class="zone-shard fill-orange-800/50 text-orange-500" d="
+                    M 775,60 Q 950,55 1080,120 L 1120,400 L 775,400 Z" />
+                
+                <!-- 7. CONFINS DU MONDE (Sud-Est de Khor) -->
+                <path onclick="selectBiome(5)" class="zone-shard fill-red-900/50 text-red-600" d="
+                    M 775,400 L 1120,400 L 1140,500 Q 1150,680 1000,730 L 775,750 Z" />
+            </svg>
+
+            <!-- LABELS DANS LES ZONES -->
+            <!-- Blanc-Port -->
+            <div class="zone-label-box top-[220px] left-[220px]">
+                <i data-lucide="anchor" class="text-slate-200 w-10 h-10 mb-2"></i>
+                <span class="font-black uppercase tracking-widest text-xs text-white italic">Blanc-Port</span>
+            </div>
+
+            <!-- Champs-d'Or -->
+            <div class="zone-label-box top-[165px] left-[520px]">
+                <i data-lucide="wheat" class="text-amber-400 w-10 h-10 mb-2"></i>
+                <span class="font-black uppercase tracking-widest text-xs text-white italic">Champs-d'Or</span>
+            </div>
+
+            <!-- Cents Couteaux -->
+            <div class="zone-label-box top-[400px] left-[390px]">
+                <i data-lucide="trees" class="text-emerald-400 w-10 h-10 mb-2"></i>
+                <span class="font-black uppercase tracking-widest text-xs text-white italic">Cents Couteaux</span>
+            </div>
+
+            <!-- Pic Jumeaux -->
+            <div class="zone-label-box top-[630px] left-[390px]">
+                <i data-lucide="mountain" class="text-blue-300 w-10 h-10 mb-2"></i>
+                <span class="font-black uppercase tracking-widest text-xs text-white italic">Pic Jumeaux</span>
+            </div>
+            
+            <!-- Arbre-Monde (Harmonisé comme les autres) -->
+            <div class="zone-label-box top-[396px] left-[728px]">
+                <i data-lucide="sprout" class="text-purple-300 w-11 h-11 mb-2 animate-pulse"></i>
+                <span class="font-black uppercase tracking-widest text-xs text-white italic">Arbre-Monde</span>
+            </div>
+
+            <!-- Royaume Khor -->
+            <div class="zone-label-box top-[220px] left-[935px]">
+                <i data-lucide="flame" class="text-orange-500 w-12 h-12 mb-2"></i>
+                <span class="font-black uppercase tracking-widest text-xs text-white italic">Royaume Khor</span>
+            </div>
+
+            <!-- Confins -->
+            <div class="zone-label-box top-[570px] left-[935px]">
+                <i data-lucide="skull" class="text-red-700 w-10 h-10 mb-2"></i>
+                <span class="font-black uppercase tracking-widest text-xs text-red-600 italic">Confins</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANNEAU DE DÉTAILS -->
+    <aside id="details-panel" class="details-panel fixed top-0 right-0 h-full w-full md:w-[580px] z-[200] p-10 md:p-14 flex flex-col">
+        <button onclick="closeDetails()" class="self-end mb-12 w-14 h-14 bg-slate-900/40 rounded-full flex items-center justify-center hover:bg-red-500/20 transition-all border border-white/10 shadow-xl">
+            <i data-lucide="x" class="w-7 h-7"></i>
+        </button>
+        <div id="panel-content" class="flex-grow overflow-y-auto custom-scroll pr-6 space-y-12 pb-10">
+            <!-- Dynamique -->
+        </div>
+    </aside>
+
+    <script>
+        const BIOMES = [
+            { 
+                id: 1, name: "Champs-d'Or", icon: "wheat", color: "text-amber-500", 
+                biome: "Plaines céréalières baignées d'un soleil éternel.",
+                history: "Le grenier de Nyr. On raconte que le premier Roi s'est agenouillé ici pour planter la première graine d'or. Aujourd'hui, les moissons sont gardées par des sentinelles mécaniques hantées par le Flux.",
+                creatures: [
+                    { name: "Épouvantail Animé", desc: "Gardien mécanique protégeant les récoltes avec une faux de fer.", img: "https://images.unsplash.com/photo-1502472915354-74b02969a2c7?w=200" },
+                    { name: "Lièvre de Soleil", desc: "Mammifère rapide dont la fourrure emmagasine l'énergie solaire.", img: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=200" },
+                    { name: "Glaneur d'Ambre", desc: "Insecte géant collectant le nectar des épis de blé.", img: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=200" }
+                ],
+                image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800"
+            },
+            { 
+                id: 2, name: "Cents Couteaux", icon: "trees", color: "text-emerald-500", 
+                biome: "Jungle dense où la flore a muté en lames d'acier.",
+                history: "Née de la sève chargée de métaux après la Fracture, cette jungle est un labyrinthe mortel. Seuls les plus agiles peuvent naviguer entre les feuilles tranchantes comme des rasoirs.",
+                creatures: [
+                    { name: "Jaguar d'Acier", desc: "Félin prédateur doté de griffes en alliage de fer.", img: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=200" },
+                    { name: "Serpent-Lame", desc: "Reptile se camouflant parmi les racines tranchantes.", img: "https://images.unsplash.com/photo-1531386151447-fd76ad50012f?w=200" },
+                    { name: "Singe-Engrenage", desc: "Primate utilisant des débris pour construire des pièges.", img: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=200" }
+                ],
+                image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800"
+            },
+            { 
+                id: 3, name: "Pic Jumeaux", icon: "mountain", color: "text-blue-400", 
+                biome: "Montagnes jumelles abritant des mines de cristal pur.",
+                history: "Les sommets touchent l'éther tandis que les mines atteignent le cœur de Nyr. Les Nains y protègent les dernières veines de cristal brut contre la corruption.",
+                creatures: [
+                    { name: "Golem de Cristal", desc: "Entité massive animée par des runes anciennes.", img: "https://images.unsplash.com/photo-1542332213-31f87348057f?w=200" },
+                    { name: "Vouivre des Glaces", desc: "Créature ailée crachant un souffle de gel paralysant.", img: "https://images.unsplash.com/photo-1542641728-6ca359b085f4?w=200" },
+                    { name: "Foreur Nain", desc: "Maître de la terre chevauchant des machines à vapeur.", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200" }
+                ],
+                image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800"
+            },
+            { 
+                id: 4, name: "Arbre-Monde", icon: "sprout", color: "text-purple-400", 
+                biome: "Nexus spirituel scindant le continent en deux.",
+                history: "Le pilier central de la réalité. Ses racines puisent le Flux éthéré pour maintenir l'équilibre entre l'Est et l'Ouest. Une zone sacrée où le temps semble s'arrêter.",
+                creatures: [
+                    { name: "Esprit du Flux", desc: "Émanation gazeuse de pure magie imprévisible.", img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=200" },
+                    { name: "Colibri d'Éther", desc: "Oiseau laissant une traînée de poussière d'étoile.", img: "https://images.unsplash.com/photo-1444464666168-49d633b867ad?w=200" },
+                    { name: "Gardien Racine", desc: "Colosse végétal veillant sur le tronc sacré.", img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=200" }
+                ],
+                image: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800"
+            },
+            { 
+                id: 5, name: "Royaume Khor", icon: "flame", color: "text-orange-500", 
+                biome: "Terres volcaniques et forges de l'apocalypse.",
+                history: "Le domaine des Forgerons. C'est ici que sont frappées les armes capables de briser les ombres. L'air y est saturé de cendres et de chaleur éternelle.",
+                creatures: [
+                    { name: "Salamandre de Feu", desc: "Lézard géant capable de projeter du magma bleu.", img: "https://images.unsplash.com/photo-1550064824-8f993041ffd3?w=200" },
+                    { name: "Automate de Bronze", desc: "Sentinelle infatigable créée par les Forgerons.", img: "https://images.unsplash.com/photo-1559181567-c3190cb9959b?w=200" },
+                    { name: "Phénix de Cendres", desc: "Oiseau renaissant de ses braises après chaque combat.", img: "https://images.unsplash.com/photo-1516233501032-2485dc30076d?w=200" }
+                ],
+                image: "https://images.unsplash.com/photo-1536697246787-1f7ae569182a?w=800"
+            },
+            { 
+                id: 6, name: "Confins", icon: "skull", color: "text-red-500", 
+                biome: "Le néant corrupteur où la réalité s'effrite.",
+                history: "La plaie ouverte de Nyr. Les fragments du monde y tombent lentement dans le vide. La corruption y est si forte que même la mémoire s'y dissout.",
+                creatures: [
+                    { name: "Ombre de l'Oubli", desc: "Spectre volant les souvenirs de ceux qu'il touche.", img: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=200" },
+                    { name: "Corbeau du Néant", desc: "Charognard se nourrissant d'émotions négatives.", img: "https://images.unsplash.com/photo-1445108771252-d1cc31a02a3c?w=200" },
+                    { name: "Horreur Fracturée", desc: "Abomination composée de morceaux de réalité disjointe.", img: "https://images.unsplash.com/photo-1509249023963-79d399994c9f?w=200" }
+                ],
+                image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800"
+            },
+            { 
+                id: 7, name: "Blanc-Port", icon: "anchor", color: "text-slate-400", 
+                biome: "Cité côtière immaculée, sanctuaire des voyageurs.",
+                history: "Le dernier bastion de civilisation épargné. Une ville suspendue au-dessus de l'océan d'argent, où chaque navire apporte des contes de terres lointaines.",
+                creatures: [
+                    { name: "Mouette de Brume", desc: "Oiseau guidant les navires à travers les tempêtes.", img: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=200" },
+                    { name: "Gardien du Quai", desc: "Chevalier d'argent veillant sur la paix de la cité.", img: "https://images.unsplash.com/photo-1599408162162-6705331d4d9c?w=200" },
+                    { name: "Rat de Cale", desc: "Rongeur rusé détectant les fuites de Flux.", img: "https://images.unsplash.com/photo-1493246318656-5bbd4afb09b7?w=200" }
+                ],
+                image: "https://images.unsplash.com/photo-1505832018823-50331d70d237?w=800"
+            }
+        ];
+
+        function selectBiome(index) {
+            const b = BIOMES[index];
+            const content = document.getElementById('panel-content');
+            content.innerHTML = `
+                <div class="space-y-12 animate-fade-in text-left">
+                    <div class="flex flex-col gap-4">
+                        <span class="text-[11px] font-black uppercase tracking-[0.5em] ${b.color} italic">Analyse de Zone // Secteur 0${b.id}</span>
+                        <h2 class="text-5xl md:text-6xl font-black uppercase italic tracking-tighter text-white leading-none">${b.name}</h2>
+                    </div>
+                    
+                    <div class="relative h-72 rounded-[3.5rem] overflow-hidden border border-white/10 shadow-2xl group">
+                        <img src="${b.image}" class="w-full h-full object-cover opacity-60 scale-110 group-hover:scale-100 transition-transform duration-1000">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-10">
+                        <div class="space-y-4">
+                            <h4 class="text-[12px] font-black uppercase tracking-widest text-amber-500 flex items-center gap-4 italic border-b border-white/5 pb-2">
+                                <i data-lucide="info" class="w-5 h-5"></i> Biome
+                            </h4>
+                            <p class="text-slate-100 text-xl font-light italic leading-relaxed">"${b.biome}"</p>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="text-[12px] font-black uppercase tracking-widest text-amber-500 flex items-center gap-4 italic border-b border-white/5 pb-2">
+                                <i data-lucide="book-open" class="w-5 h-5"></i> Histoire de la Zone
+                            </h4>
+                            <p class="text-slate-400 text-base leading-relaxed italic">${b.history}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-8">
+                        <h4 class="text-[12px] font-black uppercase tracking-widest text-amber-500 flex items-center gap-4 italic border-b border-white/5 pb-2">
+                            <i data-lucide="skull" class="w-5 h-5"></i> Bestiaire de la Zone
+                        </h4>
+                        <div class="grid grid-cols-1 gap-5">
+                            ${b.creatures.map(c => `
+                                <div class="creature-card">
+                                    <div class="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border border-white/10">
+                                        <img src="${c.img}" alt="${c.name}" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <h5 class="text-white font-black uppercase italic text-sm tracking-widest">${c.name}</h5>
+                                        <p class="text-slate-400 text-xs italic leading-snug">${c.desc}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('details-panel').classList.add('active');
+            lucide.createIcons();
+        }
+
+        function closeDetails() {
+            document.getElementById('details-panel').classList.remove('active');
+        }
+
+        function resetView() {
+            closeDetails();
+            const map = document.getElementById('map-world');
+            map.style.transform = "scale(0.9) translate(0, 0)";
+        }
+
+        window.onload = () => {
+            lucide.createIcons();
+            document.addEventListener('mousemove', (e) => {
+                if (window.innerWidth < 1024) return;
+                const moveX = (e.clientX - window.innerWidth / 2) / 90;
+                const moveY = (e.clientY - window.innerHeight / 2) / 90;
+                const map = document.getElementById('map-world');
+                map.style.transform = `scale(0.9) translate(${moveX}px, ${moveY}px)`;
+            });
+        };
+    </script>
+</body>
+</html>

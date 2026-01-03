@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmberForge</title>
+     <link rel="icon" type="image/png" href="img/favicon.png">
+    <!-- Chargement de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Styles pour assurer un affichage plein écran et supprimer les marges/défilement superflus */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Empêche les barres de défilement inutiles sur la page hôte */
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        /* Conteneur et iframe doivent occuper toute la hauteur disponible */
+        #iframe-container, #nextjs-app-iframe {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- 
+        Le conteneur principal qui occupe 100% de la fenêtre.
+    -->
+    <div id="iframe-container" class="relative">
+        <iframe
+            id="nextjs-app-iframe"
+            src="https://studio--studio-8739096173-88a76.us-central1.hosted.app"
+            title="Application Next.js intégrée en pleine page"
+            frameborder="0"
+            allowfullscreen
+            class="block"
+        >
+            <!-- Message de secours si l'iframe n'est pas supportée -->
+            <p style="padding: 20px; text-align: center;">
+                Votre navigateur ne supporte pas les iframes.
+            </p>
+        </iframe>
+    </div>
+
+</body>
+</html>
+

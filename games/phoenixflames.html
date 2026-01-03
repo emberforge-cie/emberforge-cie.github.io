@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phoenix Flames - Éveil de la Légende</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600;700;800;900&display=swap');
+        
+        :root {
+            --brand-dark: #02040a;
+            --brand-amber: #fbbf24;
+            --brand-orange: #ea580c;
+            --phoenix-red: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--brand-dark);
+            color: #f8fafc;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, h4, .font-fantasy { font-family: 'Cinzel', serif; }
+
+        /* Navigation Style */
+        .glass-nav {
+            background: rgba(2, 4, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(239, 68, 68, 0.1);
+        }
+
+        .dropdown-card {
+            background: rgba(10, 15, 30, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .group:hover .dropdown-card {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-link:hover { color: var(--phoenix-red); }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 0;
+            width: 0; height: 1px;
+            background: var(--phoenix-red);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        /* Phoenix Elements */
+        .flame-gradient {
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 50%, #7c2d12 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(239, 68, 68, 0.1);
+        }
+
+        @keyframes heat-pulse {
+            0%, 100% { opacity: 0.1; transform: scale(1); }
+            50% { opacity: 0.25; transform: scale(1.1); }
+        }
+        .heat-glow {
+            position: fixed;
+            width: 80vw;
+            height: 80vw;
+            background: radial-gradient(circle, var(--phoenix-red) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(100px);
+            animation: heat-pulse 10s ease-in-out infinite;
+        }
+
+        .ash-particle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.2;
+            pointer-events: none;
+            animation: float-ash linear infinite;
+        }
+
+        @keyframes float-ash {
+            from { transform: translateY(100vh) rotate(0deg); }
+            to { transform: translateY(-10vh) rotate(360deg); }
+        }
+
+        .mobile-overlay {
+            transform: translateX(100%);
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .mobile-overlay.active { transform: translateX(0); }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="selection:bg-red-500/30">
+
+    <div class="heat-glow top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+    <div id="ash-container" class="fixed inset-0 pointer-events-none z-10"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full z-[150] px-6 py-4 md:px-12 flex justify-between items-center glass-nav">
+        <div class="flex items-center gap-4 group cursor-pointer">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-red-500 to-orange-700 rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+                <i data-lucide="deer" class="text-slate-950 w-6 h-6 md:w-7 md:h-7"></i>
+            </div>
+            <div class="flex flex-col text-left">
+                <span class="font-inter font-black uppercase tracking-[0.3em] text-sm md:text-lg leading-none">EmberForge</span>
+                <span class="text-[7px] font-bold uppercase tracking-[0.4em] text-red-500 opacity-60 italic">Indie Studio</span>
+            </div>
+        </div>
+
+        <div class="hidden md:flex gap-10 items-center text-[9px] font-black uppercase tracking-[0.2em] text-slate-300">
+            <!-- Nos Jeux -->
+            <div class="group relative py-2">
+                <button class="nav-link flex items-center gap-2">Nos Jeux <i data-lucide="chevron-down" class="w-3 h-3 text-red-500/50"></i></button>
+                <div class="dropdown-card absolute top-full left-0 w-64 rounded-2xl p-5 mt-2">
+                    <div class="space-y-4 text-left">
+                        <a href="herosdawn.html" class="flex flex-col group/item">
+                            <span class="text-[10px] text-white group-hover/item:text-red-500 transition-colors tracking-widest font-bold uppercase">Hero's Dawn</span>
+                            <span class="text-[7px] opacity-40 uppercase tracking-[0.2em] font-medium italic mt-1">Tactique Mobile</span>
+                        </a>
+                        <a href="phoenixflames.html" class="flex flex-col group/item">
+                            <span class="text-[10px] text-red-500 tracking-widest font-bold uppercase underline">Phoenix Flames</span>
+                            <span class="text-[7px] opacity-40 uppercase tracking-[0.2em] font-medium italic mt-1">Action-Aventure PC</span>
+                        </a>
+                        <a href="tou.html" class="flex flex-col group/item">
+                            <span class="text-[10px] text-white group-hover/item:text-red-500 transition-colors tracking-widest font-bold uppercase">Two of Us</span>
+                            <span class="text-[7px] opacity-40 uppercase tracking-[0.2em] font-medium italic mt-1">Coopératif Narratif</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contes de Nyr -->
+            <div class="group relative py-2 text-left">
+                <button class="nav-link flex items-center gap-2">Contes de Nyr <i data-lucide="chevron-down" class="w-3 h-3 text-red-500/50"></i></button>
+                <div class="dropdown-card absolute top-full left-0 w-60 rounded-2xl p-5 mt-2">
+                    <div class="space-y-4">
+                        <a href="../atlas//encyclopedie.html" class="flex items-center gap-3 group/item">
+                            <i data-lucide="book-open" class="w-3.5 h-3.5 text-red-500 opacity-30"></i>
+                            <span class="text-[10px] text-white group-hover/item:text-red-500 transition-colors tracking-widest uppercase text-[7px]">Encyclopédie</span>
+                        </a>
+                        <a href="../atlas/world_map.html" class="flex items-center gap-3 group/item">
+                            <i data-lucide="map" class="w-3.5 h-3.5 text-red-500 opacity-30"></i>
+                            <span class="text-[10px] text-white group-hover/item:text-red-500 transition-colors tracking-widest uppercase text-[7px]">Carte du monde</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <a href="index.html#studio" class="nav-link">Le Studio</a>
+        </div>
+
+        <button onclick="toggleMenu()" class="md:hidden text-red-500 p-2">
+            <i data-lucide="menu" class="w-7 h-7"></i>
+        </button>
+    </nav>
+
+    <!-- MENU MOBILE -->
+    <div id="mobileOverlay" class="mobile-overlay fixed inset-0 z-[200] bg-slate-950 flex flex-col p-10 overflow-y-auto">
+        <div class="flex justify-between items-center mb-16">
+            <i data-lucide="flame" class="w-10 h-10 text-red-500"></i>
+            <button onclick="toggleMenu()"><i data-lucide="x" class="w-10 h-10 text-white"></i></button>
+        </div>
+        <div class="space-y-12 text-left">
+            <div>
+                <h4 class="text-red-500 text-[8px] font-black uppercase tracking-[0.4em] mb-6 opacity-50 italic">Nos Jeux</h4>
+                <div class="flex flex-col gap-6 text-3xl font-fantasy italic uppercase">
+                    <a href="hero_dawn.html" onclick="toggleMenu()">Hero's Dawn</a>
+                    <a href="#" class="text-red-500" onclick="toggleMenu()">Phoenix Flames</a>
+                    <a href="two_of_us.html" onclick="toggleMenu()">Two of Us</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-red-500 text-[8px] font-black uppercase tracking-[0.4em] mb-6 opacity-50 italic">Les Contes de Nyr</h4>
+                <div class="flex flex-col gap-4 text-2xl font-fantasy italic uppercase">
+                    <a href="#" onclick="toggleMenu()">Encyclopédie</a>
+                    <a href="#" onclick="toggleMenu()">Carte du monde</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section class="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 relative">
+        <div class="relative z-20 max-w-5xl space-y-8 mx-auto">
+            <div class="animate-bounce mb-4">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-red-600/10 rounded-3xl mx-auto flex items-center justify-center border border-red-500/20">
+                    <i data-lucide="flame" class="w-8 h-8 md:w-10 md:h-10 text-red-500/60"></i>
+                </div>
+            </div>
+            <h1 class="text-4xl sm:text-7xl md:text-8xl lg:text-[9rem] font-black uppercase tracking-tighter leading-[1.1] flame-gradient italic max-w-full mx-auto">
+                Phoenix <br class="md:hidden"> Flames
+            </h1>
+            <div class="h-px w-24 md:w-32 bg-red-500/30 mx-auto"></div>
+            <p class="text-slate-400 text-sm md:text-2xl lg:text-3xl font-light italic leading-relaxed max-w-2xl mx-auto px-4">
+                "Un inconnu sans passé. Un monde sans futur. Une vérité qui consumera tout."
+            </p>
+            <div class="pt-10">
+                <a href="#prologue" class="inline-flex items-center gap-4 px-10 py-5 bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded-full hover:bg-red-500 hover:scale-105 transition-all shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+                    Réclamer son passé <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROLOGUE -->
+    <section id="prologue" class="py-32 md:py-48 px-6 reveal">
+        <div class="max-w-4xl mx-auto text-center space-y-12">
+            <span class="text-red-500 font-black uppercase tracking-[0.5em] text-[10px] italic block">Système 01 // L'Éveil</span>
+            <h2 class="text-3xl md:text-6xl font-black uppercase italic leading-tight">S'éveiller dans le néant</h2>
+            <p class="text-slate-400 text-lg md:text-2xl italic font-light leading-relaxed px-4">
+                Vous ouvrez les yeux sur une terre qui ne vous dit rien. Pas de nom, pas de souvenirs, seulement le poids d'un monde divisé qui semble attendre votre premier souffle pour s'embraser.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-10 text-left">
+                <div class="glass-panel p-10 rounded-[3rem] space-y-4 border-l-4 border-l-red-500 group hover:bg-red-500/5 transition-all">
+                    <i data-lucide="brain-circuit" class="text-red-500 w-8 h-8"></i>
+                    <h4 class="text-white font-black uppercase text-[10px] tracking-widest italic">Mémoire Fragmentée</h4>
+                    <p class="text-slate-500 text-[11px] leading-relaxed italic">Découvrez votre identité à travers des flashbacks interactifs qui modifient votre perception du présent.</p>
+                </div>
+                <div class="glass-panel p-10 rounded-[3rem] space-y-4 border-l-4 border-l-orange-500 group hover:bg-orange-500/5 transition-all">
+                    <i data-lucide="eye" class="text-orange-500 w-8 h-8"></i>
+                    <h4 class="text-white font-black uppercase text-[10px] tracking-widest italic">Monde aux abois</h4>
+                    <p class="text-slate-500 text-[11px] leading-relaxed italic">Explorez les terres fracturées de Nyr, où chaque faction voit en vous soit un sauveur, soit une menace.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DESTIN -->
+    <section id="destin" class="py-32 md:py-48 bg-slate-950/30 px-6 reveal border-y border-white/5">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
+            <div class="w-full lg:w-1/2 space-y-10 text-center lg:text-left">
+                <span class="text-red-500 font-black uppercase tracking-[0.5em] text-[10px] italic block">Système 02 // Impact</span>
+                <h2 class="text-4xl md:text-7xl font-black uppercase italic leading-none">Acteur majeur du Chaos</h2>
+                <p class="text-slate-400 text-xl italic font-light leading-relaxed max-w-xl">
+                    Votre ascension est fulgurante. Ce que vous étiez n'a plus d'importance face à ce que vous devenez : l'unique pivot capable de réunir ou d'anéantir Nyr.
+                </p>
+                <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
+                    <div class="flex items-center gap-3 px-6 py-3 glass-panel rounded-full border-red-500/20">
+                        <i data-lucide="shield" class="w-4 h-4 text-red-500"></i>
+                        <span class="text-[9px] font-black uppercase tracking-widest italic">Destin Évolutif</span>
+                    </div>
+                    <div class="flex items-center gap-3 px-6 py-3 glass-panel rounded-full border-red-500/20">
+                        <i data-lucide="swords" class="w-4 h-4 text-red-500"></i>
+                        <span class="text-[9px] font-black uppercase tracking-widest italic">Choix Moraux</span>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full lg:w-1/2 flex justify-center">
+                <div class="w-72 h-72 md:w-96 md:h-96 glass-panel rounded-[4rem] border-red-500/20 relative group overflow-hidden flex items-center justify-center">
+                    <i data-lucide="flame" class="text-red-500/10 w-48 h-48 group-hover:scale-125 transition-transform duration-1000"></i>
+                    <div class="absolute inset-0 bg-gradient-to-t from-red-600/20 to-transparent"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-32 border-t border-white/5 bg-slate-950/60 text-center">
+        <div class="max-w-4xl mx-auto space-y-12 px-6">
+            <div class="flex flex-col items-center gap-8">
+                <div class="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center shadow-2xl relative">
+                    <i data-lucide="flame" class="text-slate-950 w-8 h-8"></i>
+                    <div class="absolute -inset-2 bg-red-500/10 blur-lg rounded-full animate-pulse"></div>
+                </div>
+                <h2 class="text-3xl font-black uppercase italic tracking-[0.4em]">Phoenix Flames</h2>
+                <p class="text-slate-500 text-[10px] md:text-sm italic uppercase tracking-[0.4em] max-w-sm mx-auto leading-relaxed">
+                    Une œuvre signée EmberForge Studio <br> PC / Windows • En Forge
+                </p>
+            </div>
+            
+            <div class="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-center items-center gap-10 opacity-40">
+                <a href="../studio.html" class="text-[9px] font-black uppercase tracking-widest hover:text-red-500 transition-colors flex items-center gap-3 italic">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Revenir au Studio
+                </a>
+                <span class="hidden md:block w-px h-4 bg-white/10"></span>
+                <p class="text-[8px] font-bold uppercase tracking-[0.3em] text-slate-600 italic">© 2026 EMBERFORGE • TOUS DROITS RÉSERVÉS</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Ash Particles Generator
+        function createAsh() {
+            const container = document.getElementById('ash-container');
+            if (!container) return;
+            const particle = document.createElement('div');
+            particle.className = 'ash-particle';
+            
+            const size = Math.random() * 3 + 1 + 'px';
+            particle.style.width = size;
+            particle.style.height = size;
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDuration = Math.random() * 3 + 4 + 's';
+            particle.style.opacity = Math.random() * 0.5;
+            
+            container.appendChild(particle);
+            setTimeout(() => { particle.remove(); }, 7000);
+        }
+
+        setInterval(createAsh, 200);
+
+        function toggleMenu() {
+            const menu = document.getElementById('mobileOverlay');
+            menu.classList.toggle('active');
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        window.onload = () => {
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>

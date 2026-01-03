@@ -3,47 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EmberForge</title>
-     <link rel="icon" type="image/png" href="img/favicon.png">
-    <!-- Chargement de Tailwind CSS -->
+    <title>EmberForge - Portail Officiel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Styles pour assurer un affichage plein écran et supprimer les marges/défilement superflus */
-        html, body {
-            height: 100%;
-            margin: 0;
-            overflow: hidden; /* Empêche les barres de défilement inutiles sur la page hôte */
-            padding: 0;
-            font-family: 'Inter', sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600;700;800;900&display=swap');
+        
+        :root {
+            --brand-dark: #020617;
+            --brand-amber: #fbbf24;
+            --brand-orange: #f97316;
+            --brand-solution-bg: #f8fafc;
         }
-        /* Conteneur et iframe doivent occuper toute la hauteur disponible */
-        #iframe-container, #nextjs-app-iframe {
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--brand-dark);
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Cinzel', serif; }
+
+        /* Titre EmberForge en haut - Police Inter 900 */
+        .main-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            padding: 3rem 0;
+            z-index: 150;
+            pointer-events: none;
+        }
+
+        .main-title {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(1.8rem, 6vw, 3.5rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.6em;
+            /* Effet de couleur scindée parfait entre les deux moitiés */
+            background: linear-gradient(90deg, #fff 50%, var(--brand-orange) 50%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+        }
+
+        /* Container Split Screen */
+        .split-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        /* Styles des côtés */
+        .split-side {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex: 1;
+            transition: flex 0.8s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.5s ease;
+        }
+
+        /* Studio - Côté Foncé */
+        .split-side.studio {
+            background-color: var(--brand-dark);
+            border-right: 1px solid rgba(251, 191, 36, 0.05);
+        }
+
+        .studio-glow {
+            position: absolute;
             width: 100%;
             height: 100%;
+            background: radial-gradient(circle at 30% 50%, rgba(251, 191, 36, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0.5;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Solution - Côté Blanc */
+        .split-side.solution {
+            background-color: var(--brand-solution-bg);
+        }
+
+        .solution-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 50%, rgba(249, 115, 22, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0.5;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Effet d'expansion au survol (Desktop uniquement) */
+        @media (min-width: 1024px) {
+            .split-side:hover {
+                flex: 1.8;
+                z-index: 10;
+            }
+            .split-side.studio:hover .studio-glow { opacity: 1; }
+            .split-side.solution:hover .solution-glow { opacity: 1; }
+        }
+
+        .split-content {
+            position: relative;
+            z-index: 20;
+            text-align: center;
+            padding: 2rem;
+            max-width: 480px;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .split-side:hover .split-content {
+            transform: scale(1.08);
+        }
+
+        /* Logo Central */
+        .center-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .logo-box {
+            width: clamp(80px, 10vw, 100px);
+            height: clamp(80px, 10vw, 100px);
+            background: var(--brand-dark);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            transition: all 0.5s ease;
+        }
+
+        /* Adaptations Mobiles */
+        @media (max-width: 1023px) {
+            body, html { overflow-y: auto; }
+            .split-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .split-side {
+                min-height: 50vh;
+                flex: none !important;
+                padding: 6rem 1rem;
+            }
+            .split-side.studio {
+                border-right: none;
+                border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+            }
+            .center-logo { display: none; }
+            .main-title {
+                background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                letter-spacing: 0.3em;
+            }
+            .main-header { padding: 2rem 0; }
+        }
+
+        /* Boutons */
+        .btn-base {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem 3rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .btn-studio {
+            background: rgba(251, 191, 36, 0.05);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: var(--brand-amber);
+        }
+        .btn-studio:hover {
+            background: var(--brand-amber);
+            color: var(--brand-dark);
+            box-shadow: 0 15px 30px rgba(251, 191, 36, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .btn-solution {
+            background: rgba(249, 115, 22, 0.05);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            color: var(--brand-orange);
+        }
+        .btn-solution:hover {
+            background: var(--brand-orange);
+            color: white;
+            box-shadow: 0 15px 30px rgba(249, 115, 22, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .ornament {
+            height: 2px;
+            width: 60px;
+            margin: 2rem auto;
+            opacity: 0.6;
         }
     </style>
 </head>
-<body class="bg-white">
+<body>
 
-    <!-- 
-        Le conteneur principal qui occupe 100% de la fenêtre.
-    -->
-    <div id="iframe-container" class="relative">
-        <iframe
-            id="nextjs-app-iframe"
-            src="https://studio--studio-8739096173-88a76.us-central1.hosted.app"
-            title="Application Next.js intégrée en pleine page"
-            frameborder="0"
-            allowfullscreen
-            class="block"
-        >
-            <!-- Message de secours si l'iframe n'est pas supportée -->
-            <p style="padding: 20px; text-align: center;">
-                Votre navigateur ne supporte pas les iframes.
-            </p>
-        </iframe>
+    <header class="main-header">
+        <h1 class="main-title">EmberForge</h1>
+    </header>
+
+    <div class="center-logo">
+        <div class="logo-box">
+            <i data-lucide="deer" class="text-white w-14 h-14"></i>
+        </div>
     </div>
 
+    <main class="split-container">
+        
+        <!-- CÔTÉ STUDIO (Game Studio) -->
+        <div class="split-side studio group">
+            <div class="studio-glow"></div>
+            <div class="split-content">
+                <div class="w-24 h-24 bg-amber-500/10 rounded-3xl flex items-center justify-center mx-auto mb-10 border border-amber-500/20 group-hover:rotate-6 group-hover:scale-110 transition-all shadow-xl">
+                    <i data-lucide="gamepad-2" class="text-amber-500 w-12 h-12"></i>
+                </div>
+                <h2 class="text-5xl lg:text-7xl font-black uppercase italic tracking-tighter text-white mb-2">Game Studio</h2>
+                <div class="ornament bg-amber-500"></div>
+                <p class="text-slate-400 text-sm md:text-base italic mb-12 leading-relaxed font-light px-6">
+                    Forgers d'épopées tactiques et d'univers immersifs. <br class="hidden lg:block">Entrez dans la légende de Nyr.
+                </p>
+                <a href="studio.html" class="btn-base btn-studio">
+                    Lancer l'aventure <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- CÔTÉ SOLUTION (Digital Solution) -->
+        <div class="split-side solution group">
+            <div class="solution-glow"></div>
+            <div class="split-content">
+                <div class="w-24 h-24 bg-orange-500/10 rounded-3xl flex items-center justify-center mx-auto mb-10 border border-orange-500/20 group-hover:-rotate-6 group-hover:scale-110 transition-all shadow-xl">
+                    <i data-lucide="layers" class="text-orange-500 w-12 h-12"></i>
+                </div>
+                <h2 class="text-5xl lg:text-7xl font-black uppercase italic tracking-tighter text-orange-600 mb-2">Digital Solution</h2>
+                <div class="ornament bg-orange-500"></div>
+                <p class="text-slate-600 text-sm md:text-base italic mb-12 leading-relaxed font-light px-6">
+                    Ingénierie logicielle et innovation technologique <br class="hidden lg:block">au service de votre performance.
+                </p>
+                <a href="solutions.html" class="btn-base btn-solution">
+                    Nos Solutions <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        window.onload = () => {
+            lucide.createIcons();
+        };
+    </script>
 </body>
 </html>
-
