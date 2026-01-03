@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encyclopédie de Nyr | EmberForge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600;700;800&display=swap');
+        
+        :root {
+            --brand-dark: #020617;
+            --brand-amber: #fbbf24;
+            --brand-indigo: #6366f1;
+            --brand-red: #ef4444;
+            --brand-slate: #1e293b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--brand-dark);
+            color: #f8fafc;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, h4, .font-fantasy { font-family: 'Cinzel', serif; }
+
+        .glass-nav {
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(251, 191, 36, 0.1);
+        }
+
+        .dropdown-card {
+            background: rgba(10, 15, 30, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .group:hover .dropdown-card {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-link:hover { color: var(--brand-amber); }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.3);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px);
+            border-color: var(--brand-amber);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, var(--brand-amber), var(--brand-indigo), var(--brand-red), transparent);
+            transform: translateX(-50%);
+        }
+
+        .zone-shard {
+            cursor: pointer;
+            transition: all 0.4s ease;
+            transform-origin: center;
+            transform-box: fill-box;
+            transform: scale(0.985);
+        }
+        .zone-shard:hover {
+            transform: scale(1.015);
+            filter: brightness(1.2);
+            stroke: rgba(255,255,255,0.5);
+            stroke-width: 2px;
+        }
+
+        .zone-label-box {
+            position: absolute;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            z-index: 50;
+        }
+
+        .modal-scroll::-webkit-scrollbar { width: 4px; }
+        .modal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .modal-scroll::-webkit-scrollbar-thumb { background: var(--brand-amber); border-radius: 10px; }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .mobile-overlay {
+            transform: translateX(100%);
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .mobile-overlay.active { transform: translateX(0); }
+
+        /* Filtres Améliorés */
+        .filter-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-select {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            color: #fff;
+            padding: 0.75rem 2.5rem 0.75rem 1.25rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            transition: all 0.3s ease;
+            min-width: 180px;
+        }
+
+        .filter-select:hover {
+            border-color: var(--brand-amber);
+            background: rgba(30, 41, 59, 1);
+        }
+
+        .filter-select:focus {
+            border-color: var(--brand-amber);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+        }
+
+        .filter-select option {
+            background-color: #0f172a;
+            color: white;
+            padding: 1rem;
+        }
+
+        .filter-arrow {
+            position: absolute;
+            right: 1rem;
+            pointer-events: none;
+            color: var(--brand-amber);
+            opacity: 0.6;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.4s ease forwards; }
+    </style>
+</head>
+<body class="selection:bg-amber-500/30">
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full z-[100] px-6 py-4 md:px-12 flex justify-between items-center glass-nav">
+        <div class="flex items-center gap-4 group cursor-pointer">
+            <a href="index.html" class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-amber-400 to-orange-600 rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+                <i data-lucide="deer" class="text-slate-950 w-6 h-6 md:w-7 md:h-7"></i>
+            </a>
+            <div class="flex flex-col text-left">
+                <span class="font-inter font-black uppercase tracking-[0.3em] text-sm md:text-lg leading-none"><a href="../studio.html">EmberForge</a></span>
+                <span class="text-[7px] font-bold uppercase tracking-[0.4em] text-amber-500 opacity-60">Indie Studio</span>
+            </div>
+        </div>
+
+        <div class="hidden md:flex gap-10 items-center text-[9px] font-black uppercase tracking-[0.2em] text-slate-300 italic">
+            <div class="group relative py-2">
+                <button class="nav-link flex items-center gap-2 text-white">Nos Jeux <i data-lucide="chevron-down" class="w-3 h-3 text-amber-500/50"></i></button>
+                <div class="dropdown-card absolute top-full left-0 w-64 rounded-2xl p-5 mt-2">
+                    <div class="space-y-4 text-left">
+                        <a href="../games/herosdawn.html" class="flex flex-col group/item">
+                            <span class="text-[10px] text-white group-hover/item:text-amber-500 transition-colors tracking-widest font-bold uppercase">Hero's Dawn</span>
+                            <span class="text-[7px] opacity-40 uppercase tracking-[0.2em] font-medium italic mt-1 text-slate-400">Tactique Mobile</span>
+                        </a>
+                        <a href="../games/phoenixflames.html" class="flex flex-col group/item">
+                            <span class="text-[10px] text-white group-hover/item:text-amber-500 transition-colors tracking-widest font-bold uppercase">Phoenix Flames</span>
+                            <span class="text-[7px] opacity-40 uppercase tracking-[0.2em] font-medium italic mt-1 text-slate-400">Action PC</span>
+                        </a>
+                        <a href="../games/tou.html" class="flex flex-col group/item">
+                            <span class="text-[10px] text-white group-hover/item:text-amber-500 transition-colors tracking-widest font-bold uppercase">Two of Us</span>
+                            <span class="text-[7px] opacity-40 uppercase tracking-[0.2em] font-medium italic mt-1 text-slate-400">Coop Narratif</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <a href="world_map.html" class="nav-link text-white">Carte du monde</a>
+            <a href="../studio.html" class="nav-link text-white">Studio</a>
+        </div>
+
+        <button onclick="toggleMenu()" class="md:hidden text-amber-500 p-2">
+            <i data-lucide="menu" class="w-7 h-7"></i>
+        </button>
+    </nav>
+
+    <!-- MOBILE OVERLAY -->
+    <div id="mobileOverlay" class="mobile-overlay fixed inset-0 z-[200] bg-slate-950 flex flex-col p-10 overflow-y-auto">
+        <div class="flex justify-between items-center mb-16 text-white">
+            <i data-lucide="deer" class="w-10 h-10 text-amber-500"></i>
+            <button onclick="toggleMenu()"><i data-lucide="x" class="w-10 h-10 text-white"></i></button>
+        </div>
+        <div class="space-y-12 text-left">
+            <div class="flex flex-col gap-6 text-3xl font-fantasy italic uppercase text-white">
+                <a href="index.html" onclick="toggleMenu()">Accueil</a>
+                <a href="wip_landing.html" onclick="toggleMenu()">Hero's Dawn</a>
+                <a href="phoenix_flames.html" onclick="toggleMenu()">Phoenix Flames</a>
+                <a href="two_of_us.html" onclick="toggleMenu()">Two of Us</a>
+                <a href="world_map.html" onclick="toggleMenu()">Atlas</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO SECTION -->
+    <header class="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 pt-32 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent"></div>
+        <div class="relative z-10 space-y-6">
+            <span class="text-amber-500 font-black uppercase tracking-[0.6em] text-[10px] md:text-xs italic block">Nexus Knowledge Core</span>
+            <h1 class="text-6xl md:text-9xl font-black uppercase italic tracking-tighter text-white leading-none">Encyclopédie</h1>
+            <div class="w-24 h-1 bg-amber-500 mx-auto opacity-30 mt-6"></div>
+            <p class="text-slate-400 text-lg md:text-2xl font-light italic leading-relaxed max-w-2xl mx-auto">
+                "Le savoir est la forge de la réalité. Plongez dans les archives de Nyr."
+            </p>
+        </div>
+    </header>
+
+    <!-- SECTION TIMELINE -->
+    <section class="max-w-7xl mx-auto py-24 px-6 reveal">
+        <div class="text-center mb-24">
+            <h2 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">Chronologie des Âges</h2>
+            <p class="text-slate-500 italic uppercase tracking-[0.4em] text-[10px] mt-2 text-slate-400">La marche du temps sur Nyr</p>
+        </div>
+
+        <div class="relative py-12">
+            <div class="timeline-line"></div>
+            
+            <div class="space-y-32">
+                <div class="relative flex flex-col md:flex-row items-center gap-8 md:gap-0">
+                    <div class="w-full md:w-1/2 md:pr-12 text-center md:text-right">
+                        <span class="text-amber-500 font-bold uppercase tracking-widest text-xs italic">Époque Primitive</span>
+                        <h3 class="text-3xl font-black uppercase italic text-white mt-2">L'Éveil (Hero's Dawn)</h3>
+                        <p class="text-slate-400 mt-4 italic">La découverte du Flux et la fondation de Blanc-Port. Les premiers aventuriers explorent les dioramas du monde.</p>
+                    </div>
+                    <div class="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-amber-500 border-4 border-slate-950 z-10 shadow-[0_0_20px_rgba(251,191,36,0.5)]"></div>
+                    <div class="w-full md:w-1/2 md:pl-12"></div>
+                </div>
+
+                <div class="relative flex flex-col md:flex-row-reverse items-center gap-8 md:gap-0">
+                    <div class="w-full md:w-1/2 md:pl-12 text-center md:text-left">
+                        <span class="text-red-500 font-bold uppercase tracking-widest text-xs italic">Époque de l'Embrasement</span>
+                        <h3 class="text-3xl font-black uppercase italic text-white mt-2">Le Brasier (Phoenix Flames)</h3>
+                        <p class="text-slate-400 mt-4 italic">Le retour du Phoenix. Le monde sombre dans le chaos alors qu'un inconnu cherche ses souvenirs dans les flammes.</p>
+                    </div>
+                    <div class="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-red-500 border-4 border-slate-950 z-10 shadow-[0_0_20px_rgba(239,68,68,0.5)]"></div>
+                    <div class="w-full md:w-1/2 md:pr-12"></div>
+                </div>
+
+                <div class="relative flex flex-col md:flex-row items-center gap-8 md:gap-0">
+                    <div class="w-full md:w-1/2 md:pr-12 text-center md:text-right">
+                        <span class="text-indigo-500 font-bold uppercase tracking-widest text-xs italic">Époque de l'Unisson</span>
+                        <h3 class="text-3xl font-black uppercase italic text-white mt-2">La Résonance (Two of Us)</h3>
+                        <p class="text-slate-400 mt-4 italic">Le crépuscule des étoiles. Ezra et Rose unissent leurs auras pour sauver ce qu'il reste de la réalité fracturée.</p>
+                    </div>
+                    <div class="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-indigo-500 border-4 border-slate-950 z-10 shadow-[0_0_20px_rgba(99,102,241,0.5)]"></div>
+                    <div class="w-full md:w-1/2 md:pl-12"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION WORLD MAP -->
+    <section class="py-24 bg-slate-900/40 border-y border-white/5 reveal overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 text-center mb-16">
+            <h2 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">Géographie de Nyr</h2>
+            <p class="text-slate-500 italic uppercase tracking-[0.4em] text-[10px] mt-2">Cliquez sur une zone pour l'analyser</p>
+        </div>
+        
+        <div class="flex items-center justify-center p-4">
+            <div id="encyclopedia-map" class="w-full max-w-5xl aspect-[12/8] relative">
+                <svg viewBox="0 0 1200 800" class="w-full h-full z-10">
+                    <path onclick="openInfo('biome', 6)" class="zone-shard fill-slate-800/80 text-slate-400" d="M 110,160 Q 80,250 105,340 L 380,300 Q 360,180 380,75 Q 150,110 110,160 Z" />
+                    <path onclick="openInfo('biome', 0)" class="zone-shard fill-amber-600/50 text-amber-500" d="M 380,75 Q 550,60 680,65 L 680,280 Q 500,300 380,300 L 380,75 Z" />
+                    <path onclick="openInfo('biome', 1)" class="zone-shard fill-emerald-700/50 text-emerald-500" d="M 105,340 L 380,300 L 680,300 L 680,520 Q 400,530 100,500 L 95,450 L 105,340 Z" />
+                    <path onclick="openInfo('biome', 2)" class="zone-shard fill-blue-700/50 text-blue-400" d="M 100,500 Q 400,530 680,520 L 680,760 Q 350,780 120,640 Q 200,720 100,650 L 100,500 Z" />
+                    <path onclick="openInfo('biome', 3)" class="zone-shard fill-purple-700/50 text-purple-400" d="M 680,65 Q 730,55 775,60 L 775,750 Q 720,760 680,760 L 680,65 Z" />
+                    <path onclick="openInfo('biome', 4)" class="zone-shard fill-orange-800/50 text-orange-500" d="M 775,60 Q 950,55 1080,120 L 1120,400 L 775,400 Z" />
+                    <path onclick="openInfo('biome', 5)" class="zone-shard fill-red-900/50 text-red-600" d="M 775,400 L 1120,400 L 1140,500 Q 1150,680 1000,730 L 775,750 Z" />
+                </svg>
+
+                <div class="zone-label-box" style="top: 25%; left: 20%;">
+                    <i data-lucide="anchor" class="text-slate-200 w-8 h-8 md:w-10 md:h-10 mb-2"></i>
+                    <span class="font-black uppercase tracking-[0.2em] text-[8px] md:text-[10px] text-white">Blanc-Port</span>
+                </div>
+                <div class="zone-label-box" style="top: 22.5%; left: 44%;">
+                    <i data-lucide="wheat" class="text-amber-400 w-8 h-8 md:w-10 md:h-10 mb-2"></i>
+                    <span class="font-black uppercase tracking-[0.2em] text-[8px] md:text-[10px] text-white">Champs-d'Or</span>
+                </div>
+                <div class="zone-label-box" style="top: 51.2%; left: 32.5%;">
+                    <i data-lucide="trees" class="text-emerald-400 w-8 h-8 md:w-10 md:h-10 mb-2"></i>
+                    <span class="font-black uppercase tracking-[0.2em] text-[8px] md:text-[10px] text-white">Cents Couteaux</span>
+                </div>
+                <div class="zone-label-box" style="top: 80%; left: 32.5%;">
+                    <i data-lucide="mountain" class="text-blue-300 w-8 h-8 md:w-10 md:h-10 mb-2"></i>
+                    <span class="font-black uppercase tracking-[0.2em] text-[8px] md:text-[10px] text-white">Pic Jumeaux</span>
+                </div>
+                <div class="zone-label-box" style="top: 50%; left: 60.6%;">
+                    <i data-lucide="sprout" class="text-purple-300 w-10 h-10 md:w-12 md:h-12 mb-2 animate-pulse"></i>
+                    <span class="font-black uppercase tracking-[0.2em] text-[8px] md:text-[10px] text-white">Arbre-Monde</span>
+                </div>
+                <div class="zone-label-box" style="top: 28.7%; left: 79%;">
+                    <i data-lucide="flame" class="text-orange-500 w-10 h-10 md:w-12 md:h-12 mb-2"></i>
+                    <span class="font-black uppercase tracking-[0.2em] text-[8px] md:text-[10px] text-white">Royaume Khor</span>
+                </div>
+                <div class="zone-label-box" style="top: 71.8%; left: 79.7%;">
+                    <i data-lucide="skull" class="text-red-700 w-8 h-8 md:w-10 md:h-10 mb-2"></i>
+                    <span class="font-black uppercase tracking-[0.2em] text-[8px] md:text-[10px] text-red-600">Confins</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION CONTES -->
+    <section class="max-w-7xl mx-auto py-24 px-6 reveal">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">Les Grimoires</h2>
+            <p class="text-slate-500 italic uppercase tracking-[0.4em] text-[10px] mt-2 text-slate-400">Légendes et récits oubliés</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-white">
+            <div onclick="openInfo('tale', 0)" class="glass-panel p-10 rounded-[3rem] card-hover cursor-pointer group">
+                <i data-lucide="book" class="text-amber-500 w-10 h-10 mb-6 opacity-40 group-hover:opacity-100 transition-opacity"></i>
+                <h3 class="text-2xl font-black uppercase italic mb-2">Le Premier Forgeron</h3>
+                <p class="text-slate-500 text-xs italic uppercase tracking-widest">Auteur : Inconnu • Ère de l'Éveil</p>
+            </div>
+            <div onclick="openInfo('tale', 1)" class="glass-panel p-10 rounded-[3rem] card-hover cursor-pointer group">
+                <i data-lucide="book" class="text-indigo-500 w-10 h-10 mb-6 opacity-40 group-hover:opacity-100 transition-opacity"></i>
+                <h3 class="text-2xl font-black uppercase italic mb-2">L'Ombre sur Blanc-Port</h3>
+                <p class="text-slate-500 text-xs italic uppercase tracking-widest">Auteur : Maître Niffl • Ère des Cendres</p>
+            </div>
+            <div onclick="openInfo('tale', 2)" class="glass-panel p-10 rounded-[3rem] card-hover cursor-pointer group">
+                <i data-lucide="book" class="text-purple-500 w-10 h-10 mb-6 opacity-40 group-hover:opacity-100 transition-opacity"></i>
+                <h3 class="text-2xl font-black uppercase italic mb-2">Le Chant de l'Unisson</h3>
+                <p class="text-slate-500 text-xs italic uppercase tracking-widest">Auteur : Scribe Rose • Ère de la Résonance</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION BESTIAIRE AVEC FILTRE AMÉLIORÉ -->
+    <section class="bg-slate-900/40 py-24 border-y border-white/5 reveal">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-16 gap-8 text-white">
+                <div class="text-center md:text-left">
+                    <h2 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter">Bestiaire Profane</h2>
+                    <p class="text-slate-500 italic uppercase tracking-[0.4em] text-[10px] mt-2 text-slate-400">Archives des entités de Nyr</p>
+                </div>
+                
+                <!-- FILTRES AVEC STYLE ADAPTÉ -->
+                <div class="flex flex-wrap gap-4 items-center bg-white/5 p-4 rounded-3xl border border-white/10">
+                    <div class="filter-container">
+                        <select id="filterZone" onchange="applyFilters()" class="filter-select">
+                            <option value="all">Toutes les Zones</option>
+                            <option value="Confins">Confins</option>
+                            <option value="Cents Couteaux">Cents Couteaux</option>
+                            <option value="Pic Jumeaux">Pic Jumeaux</option>
+                            <option value="Royaume de Khor">Royaume de Khor</option>
+                            <option value="Arbre-Monde">Arbre-Monde</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="filter-arrow w-4 h-4"></i>
+                    </div>
+                    <div class="filter-container">
+                        <select id="filterType" onchange="applyFilters()" class="filter-select">
+                            <option value="all">Tous les Types</option>
+                            <option value="Spectre">Spectre</option>
+                            <option value="Faune">Faune</option>
+                            <option value="Golem">Golem</option>
+                            <option value="Élémentaire">Élémentaire</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="filter-arrow w-4 h-4"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bestiaryGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[400px]">
+                <!-- Contenu dynamique -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION LÉGENDES -->
+    <section class="max-w-7xl mx-auto py-24 px-6 reveal">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">Légendes de Nyr</h2>
+            <p class="text-slate-500 italic uppercase tracking-[0.4em] text-[10px] mt-2 text-slate-400">Les visages qui ont marqué l'histoire</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-white">
+            <div onclick="openInfo('legend', 0)" class="text-center group cursor-pointer">
+                <div class="w-48 h-48 bg-slate-900 rounded-full mx-auto border-2 border-amber-500/20 group-hover:border-amber-500 transition-all flex items-center justify-center mb-6 overflow-hidden">
+                    <i data-lucide="user" class="text-amber-500 w-20 h-20 opacity-20"></i>
+                </div>
+                <h3 class="text-2xl font-black uppercase italic">Ezra</h3>
+                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-500 italic">Le Bouclier de Nyr</span>
+            </div>
+            <div onclick="openInfo('legend', 1)" class="text-center group cursor-pointer">
+                <div class="w-48 h-48 bg-slate-900 rounded-full mx-auto border-2 border-indigo-500/20 group-hover:border-indigo-500 transition-all flex items-center justify-center mb-6 overflow-hidden">
+                    <i data-lucide="sparkles" class="text-indigo-500 w-20 h-20 opacity-20"></i>
+                </div>
+                <h3 class="text-2xl font-black uppercase italic">Rose</h3>
+                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-500 italic">L'Écho de l'Éther</span>
+            </div>
+            <div onclick="openInfo('legend', 2)" class="text-center group cursor-pointer">
+                <div class="w-48 h-48 bg-slate-900 rounded-full mx-auto border-2 border-red-500/20 group-hover:border-red-500 transition-all flex items-center justify-center mb-6 overflow-hidden">
+                    <i data-lucide="flame" class="text-red-500 w-20 h-20 opacity-20"></i>
+                </div>
+                <h3 class="text-2xl font-black uppercase italic">Le Phoenix</h3>
+                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-500 italic">L'Entité Solaire</span>
+            </div>
+            <div onclick="openInfo('legend', 3)" class="text-center group cursor-pointer">
+                <div class="w-48 h-48 bg-slate-900 rounded-full mx-auto border-2 border-slate-500/20 group-hover:border-white transition-all flex items-center justify-center mb-6 overflow-hidden">
+                    <i data-lucide="hammer" class="text-slate-500 w-20 h-20 opacity-20"></i>
+                </div>
+                <h3 class="text-2xl font-black uppercase italic">Khor</h3>
+                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-500 italic">Le Grand Forgeron</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION FOLKLORE -->
+    <section class="max-w-7xl mx-auto py-24 px-6 reveal">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">Folklore & Coutumes</h2>
+            <p class="text-slate-500 italic uppercase tracking-[0.4em] text-[10px] mt-2 text-slate-400">Le cœur battant du peuple de Nyr</p>
+        </div>
+
+        <div class="flex gap-8 overflow-x-auto pb-12 px-4 modal-scroll text-white">
+            <div onclick="openInfo('folklore', 0)" class="min-w-[320px] glass-panel p-10 rounded-[3rem] text-center card-hover cursor-pointer group shrink-0">
+                <i data-lucide="sun" class="text-amber-500 w-12 h-12 mb-6 mx-auto group-hover:animate-pulse"></i>
+                <h3 class="text-2xl font-black uppercase italic mb-2">Fête de l'Étincelle</h3>
+                <p class="text-slate-400 text-xs italic leading-relaxed uppercase tracking-tighter">Célébration annuelle de la création du monde</p>
+            </div>
+            <div onclick="openInfo('folklore', 1)" class="min-w-[320px] glass-panel p-10 rounded-[3rem] text-center card-hover cursor-pointer group shrink-0">
+                <i data-lucide="moon" class="text-indigo-400 w-12 h-12 mb-6 mx-auto group-hover:animate-bounce"></i>
+                <h3 class="text-2xl font-black uppercase italic mb-2">Nuit des Étoiles</h3>
+                <p class="text-slate-400 text-xs italic leading-relaxed uppercase tracking-tighter">Hommage aux âmes disparues dans les Confins</p>
+            </div>
+            <div onclick="openInfo('folklore', 2)" class="min-w-[320px] glass-panel p-10 rounded-[3rem] text-center card-hover cursor-pointer group shrink-0">
+                <i data-lucide="zap" class="text-purple-400 w-12 h-12 mb-6 mx-auto group-hover:scale-110 transition-transform"></i>
+                <h3 class="text-2xl font-black uppercase italic mb-2">Le Rite d'Unisson</h3>
+                <p class="text-slate-400 text-xs italic leading-relaxed uppercase tracking-tighter">Mariage mystique liant deux auras éternellement</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODALE UNIVERSELLE -->
+    <div id="encycloModal" class="fixed inset-0 z-[500] bg-slate-950/95 backdrop-blur-3xl hidden flex items-center justify-center p-6" onclick="if(event.target === this) closeModal()">
+        <div class="glass-panel w-full max-w-4xl max-h-[90vh] rounded-[4rem] p-10 md:p-16 relative overflow-hidden flex flex-col shadow-2xl border-amber-500/20" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute top-8 right-8 w-12 h-12 glass-panel rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all hover:scale-110 z-10 text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div id="modalContent" class="overflow-y-auto modal-scroll pr-4 text-white">
+                <!-- Dynamique -->
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="py-24 border-t border-white/5 bg-slate-950 text-center relative overflow-hidden">
+        <div class="max-w-4xl mx-auto space-y-12 px-6">
+            <div class="flex flex-col items-center gap-6">
+                <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center border border-white/10 shadow-2xl">
+                    <i data-lucide="deer" class="text-amber-500 w-8 h-8"></i>
+                </div>
+                <h2 class="text-3xl font-black uppercase italic tracking-[0.3em] text-white">EmberForge</h2>
+            </div>
+            <p class="text-[9px] font-bold uppercase tracking-[0.4em] text-slate-700 italic">© 2026 EMBERFORGE STUDIO • NYR ARCHIVE CORE</p>
+        </div>
+    </footer>
+
+    <script>
+        const DATABASE = {
+            biome: [
+                { name: "Champs-d'Or", lore: "Plaines céréalières baignées d'un soleil éternel. On y forgeait autrefois les outils agricoles les plus parfaits de Nyr." },
+                { name: "Cents Couteaux", lore: "Jungle d'acier où la sève s'est transformée en métal après la Fracture." },
+                { name: "Pic Jumeaux", lore: "Montagnes battues par les vents d'éther, abritant les derniers nains de la lignée de Khor." },
+                { name: "Arbre-Monde", lore: "L'axe central de Nyr, canalisant la magie brute (Flux) vers le reste du monde." },
+                { name: "Royaume de Khor", lore: "Domaine volcanique où bat le cœur du Grand Forgeron." },
+                { name: "Confins", lore: "Le néant corrupteur où la réalité s'effrite lentement dans l'oubli." },
+                { name: "Blanc-Port", lore: "La cité suspendue, dernier bastion de la civilisation avant le chaos total." }
+            ],
+            tale: [
+                { title: "Le Premier Forgeron", text: "Au commencement, Nyr n'était que poussière froide. Puis vint Khor, le Premier. D'un coup de marteau sur l'enclume du destin, il forgea le soleil et les étoiles. Mais son œuvre ne fut complète que lorsqu'il planta la graine de l'Arbre-Monde, liant la matière au Flux éternel." },
+                { title: "L'Ombre sur Blanc-Port", text: "Niffl raconte que l'Oubli ne frappe pas par hasard. Il cherche les cœurs isolés. Quand Blanc-Port cessa de chanter, les ombres grimpèrent aux murs d'argent. C'est ce jour-là que le Grand Héros disparut, emportant avec lui le secret des étoiles." },
+                { title: "Le Chant de l'Unisson", text: "Rose l'a écrit : seul le lien peut briser l'Oubli. Quand deux âmes partagent une même fréquence, elles créent un éclat capable de repousser le néant. Ezra fut le premier à comprendre, et sa résonance avec sa sœur changea l'histoire de Nyr à jamais." }
+            ],
+            bestiary: [
+                { id: 0, name: "Ombre de l'Oubli", zone: "Confins", type: "Spectre", icon: "skull", color: "text-amber-500", desc: "Un spectre sans forme, résidu de mémoires effacées.", part: "Invisible dans le noir total.", hist: "Anciennement des humains ayant perdu leur identité dans le Flux." },
+                { id: 1, name: "Jaguar d'Acier", zone: "Cents Couteaux", type: "Faune", icon: "paw-print", color: "text-emerald-500", desc: "Félin dont la fourrure est composée de fines lames métalliques.", part: "Ses griffes ignorent les armures magiques.", hist: "Fruit de la mutation de la sève de fer sur la faune locale." },
+                { id: 2, name: "Golem de Cristal", zone: "Pic Jumeaux", type: "Golem", icon: "gem", color: "text-blue-500", desc: "Massif colosse de quartz pur animé par des runes.", part: "Absorbe la magie de ses adversaires.", hist: "Gardiens millénaires construits par les nains pour protéger les mines." },
+                { id: 3, name: "Salamandre de Feu", zone: "Royaume de Khor", type: "Élémentaire", icon: "flame", color: "text-orange-500", desc: "Lézard géant vivant dans le magma en fusion.", part: "Projectiles de lave bleue.", hist: "Considérées comme les serviteurs du Premier Forgeron." },
+                { id: 4, name: "Esprit du Flux", zone: "Arbre-Monde", type: "Spectre", icon: "zap", color: "text-purple-500", desc: "Nuage de pure énergie magique doué de conscience.", part: "Se dématérialise à volonté.", hist: "Gardien du nexus vital de Nyr." }
+            ],
+            legend: [
+                { name: "Ezra", title: "Le Bouclier de Nyr", lore: "Ezra porte l'armure de son père et protège sa sœur avec une dévotion sans faille. Il est l'incarnation de la force tranquille.", spec: "Défense absolue / Force brute" },
+                { name: "Rose", title: "L'Écho de l'Éther", lore: "Rose entend les murmures de l'Arbre-Monde. Sa capacité à manipuler le Flux fait d'elle l'unique espoir de restaurer l'équilibre.", spec: "Magie d'Unisson / Vision éthérée" },
+                { name: "Le Phoenix", title: "L'Entité Solaire", lore: "Créature mythique disparue pendant des siècles. Son retour signale soit la renaissance du monde, soit son embrasement final.", spec: "Manipulation du feu sacré / Renaissance" },
+                { name: "Khor", title: "Le Grand Forgeron", lore: "Le créateur légendaire de Nyr. On dit qu'il attend celui qui sera digne de forger le nouvel âge dans les entrailles de la montagne.", spec: "Création primordiale / Savoir ancien" }
+            ],
+            folklore: [
+                { name: "Fête de l'Étincelle", desc: "Une nuit où tout Blanc-Port allume des lanternes d'ambre. On dit que cela guide les âmes égarées vers le refuge.", details: "Célébrée le premier jour de l'été." },
+                { name: "Nuit des Étoiles", desc: "Un silence total est imposé à travers le monde pour écouter les vibrations du ciel. On y voit parfois des fragments de souvenirs tomber du ciel.", details: "Période de deuil et de réflexion." },
+                { name: "Le Rite d'Unisson", desc: "Deux amants ou alliés mélangent leurs larmes dans un calice de cristal. Si le liquide s'illumine, leurs âmes sont liées.", details: "Base de la mécanique de jeu de Two of Us." }
+            ]
+        };
+
+        function toggleMenu() {
+            document.getElementById('mobileOverlay').classList.toggle('active');
+        }
+
+        function applyFilters() {
+            const zoneFilter = document.getElementById('filterZone').value;
+            const typeFilter = document.getElementById('filterType').value;
+            const grid = document.getElementById('bestiaryGrid');
+            
+            const filteredData = DATABASE.bestiary.filter(item => {
+                const zoneMatch = zoneFilter === 'all' || item.zone === zoneFilter;
+                const typeMatch = typeFilter === 'all' || item.type === typeFilter;
+                return zoneMatch && typeMatch;
+            });
+
+            grid.innerHTML = filteredData.length > 0 ? filteredData.map(item => `
+                <div onclick="openInfo('bestiary', ${item.id})" class="glass-panel aspect-square rounded-[2rem] flex flex-col items-center justify-center p-6 text-center card-hover cursor-pointer group animate-fade-in text-white">
+                    <div class="w-16 h-16 md:w-20 md:h-20 bg-slate-950 rounded-2xl mb-4 flex items-center justify-center border border-white/5 group-hover:border-amber-500 transition-all">
+                        <i data-lucide="${item.icon}" class="${item.color} w-8 h-8"></i>
+                    </div>
+                    <h4 class="text-white font-black uppercase italic text-[10px] tracking-widest">${item.name}</h4>
+                    <span class="text-[7px] text-slate-500 font-bold uppercase mt-1 italic tracking-widest">${item.type}</span>
+                </div>
+            `).join('') : `
+                <div class="col-span-full flex flex-col items-center justify-center py-20 opacity-30 italic text-white">
+                    <i data-lucide="search-x" class="w-10 h-10 mb-4"></i>
+                    <p>Aucune entité trouvée pour ces critères</p>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function openInfo(type, indexOrId) {
+            let data;
+            if(type === 'bestiary') {
+                data = DATABASE.bestiary.find(i => i.id === indexOrId);
+            } else {
+                data = DATABASE[type][indexOrId];
+            }
+            
+            const content = document.getElementById('modalContent');
+            let html = "";
+
+            if (type === 'biome') {
+                html = `<h3 class="text-4xl md:text-6xl font-black uppercase italic text-white mb-8 leading-none">${data.name}</h3><p class="text-slate-300 text-xl italic font-light leading-relaxed">${data.lore}</p>`;
+            } else if (type === 'tale') {
+                html = `<h3 class="text-4xl font-black uppercase italic text-amber-500 mb-8">${data.title}</h3><p class="text-slate-300 text-lg italic leading-relaxed first-letter:text-5xl first-letter:font-black first-letter:text-amber-500 first-letter:float-left first-letter:mr-3">${data.text}</p>`;
+            } else if (type === 'bestiary') {
+                html = `<h3 class="text-4xl font-black uppercase italic text-white mb-4">${data.name}</h3><div class="flex gap-4 mb-10"><span class="px-4 py-1 bg-amber-500/10 text-amber-500 rounded-full text-[10px] font-bold uppercase tracking-widest">${data.zone}</span><span class="px-4 py-1 bg-white/5 text-slate-400 rounded-full text-[10px] font-bold uppercase tracking-widest">${data.type}</span></div><div class="space-y-8 text-left"><div class="space-y-2"><h4 class="text-[10px] font-black uppercase text-amber-500 tracking-widest italic border-b border-white/5 pb-1">Description</h4><p class="text-slate-400 italic">${data.desc}</p></div><div class="space-y-2"><h4 class="text-[10px] font-black uppercase text-amber-500 tracking-widest italic border-b border-white/5 pb-1">Particularité</h4><p class="text-slate-400 italic">${data.part}</p></div><div class="space-y-2"><h4 class="text-[10px] font-black uppercase text-amber-500 tracking-widest italic border-b border-white/5 pb-1">Histoire</h4><p class="text-slate-400 italic">${data.hist}</p></div></div>`;
+            } else if (type === 'legend') {
+                html = `<h3 class="text-4xl md:text-6xl font-black uppercase italic text-white mb-2 leading-none text-left">${data.name}</h3><span class="text-amber-500 text-xs font-black uppercase tracking-[0.4em] italic mb-10 block text-left">${data.title}</span><div class="grid grid-cols-1 md:grid-cols-2 gap-10 mt-10 text-left"><div class="space-y-4"><h4 class="text-[10px] font-black uppercase text-slate-500 tracking-widest italic border-b border-white/5 pb-1">Biographie</h4><p class="text-slate-300 italic leading-relaxed">${data.lore}</p></div><div class="bg-white/5 rounded-3xl p-8"><h4 class="text-[10px] font-black uppercase text-amber-500 tracking-widest italic mb-4">Spécialités</h4><p class="text-slate-400 italic">${data.spec}</p></div></div>`;
+            } else if (type === 'folklore') {
+                html = `<h3 class="text-4xl font-black uppercase italic text-white mb-4 text-left">${data.name}</h3><p class="text-slate-300 text-2xl italic font-light mb-10 leading-relaxed text-left">"${data.desc}"</p><div class="bg-indigo-500/5 rounded-3xl p-8 border border-indigo-500/10 text-left"><h4 class="text-[10px] font-black uppercase text-indigo-400 tracking-widest italic mb-2">Détails de la coutume</h4><p class="text-slate-400 italic">${data.details}</p></div>`;
+            }
+
+            content.innerHTML = html;
+            document.getElementById('encycloModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('encycloModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        window.onload = () => {
+            lucide.createIcons();
+            applyFilters();
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        };
+    </script>
+</body>
+</html>
