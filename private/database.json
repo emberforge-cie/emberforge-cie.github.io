@@ -2,11 +2,19 @@
   "ages": [
     {
       "id": "dawn",
-      "title": "L'Aube",
+      "title": "L'Age des Héros (-500 à 0)",
       "game": "Hero's Dawn",
       "color": "amber",
       "icon": "sun",
       "desc": "Découverte du Flux éthéré et fondation de Blanc-Port. Les premiers explorateurs tracent les frontières du monde connu."
+    },
+    {
+      "id": "fracture",
+      "title": "La Facture (l'An 0)",
+      "game": "Shattered Realms",
+      "color": "gray",
+      "icon": "cloud",
+      "desc": "La Fracture déchire Nyr, plongeant les royaumes dans le chaos. Les héros se lèvent pour combattre l'Oubli qui efface les souvenirs et les terres tandis que le monde se retrouver divisé en deux."
     },
     {
       "id": "flame",
