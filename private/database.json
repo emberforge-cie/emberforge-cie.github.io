@@ -53,35 +53,35 @@
       "icon": "trees",
       "top": "51.2%",
       "left": "32.5%",
-      "lore": "Jungle d'acier où la sève s'est transformée en métal après la Fracture. Chaque feuille peut devenir une arme mortelle."
+      "lore": "Terre ancestrale et mystiques des Elfes. Cette forêt dense et dangeureuse est truffée de pièges naturels et de créatures féroces. Véritable labyrinthe pour les étrangers, seuls les Elfes connaissent ses secrets qu'ils gardent jalousement."
     },
     "pic-jumeaux": {
       "name": "Pic Jumeaux",
       "icon": "mountain",
       "top": "80%",
       "left": "32.5%",
-      "lore": "Montagnes battues par les vents d'éther, abritant les derniers nains de la lignée de Khor et des mines de cristal pur."
+      "lore": "Montagnes battues par les vents d'éther, abritant dans ses entrailles les derniers nains de la lignée de Khor et des mines de cristal pur, chargé en éther. Dans les carvernes profondes, les racines de l'Arbre-Monde se nourrissent de la magie."
     },
     "arbre-monde": {
       "name": "Arbre-Monde",
       "icon": "sprout",
       "top": "50%",
       "left": "60.6%",
-      "lore": "L'axe central de Nyr, canalisant la magie brute (Flux) vers le reste du monde. C'est le cœur battant de la réalité."
+      "lore": "L'axe central de Nyr, canalisant la magie brute (Flux) vers le reste du monde. C'est le cœur battant de la réalité, le berceau de toute vie et le nid légendaire du Phoenix."
     },
     "royaume-khor": {
       "name": "Royaume Khor",
       "icon": "flame",
       "top": "28.7%",
       "left": "79%",
-      "lore": "Domaine volcanique où bat le cœur du Grand Forgeron. L'endroit où les armes les plus puissantes sont frappées."
+      "lore": "Domaine volcanique où bat le cœur du Grand Forgeron, Khor. L'endroit où les armes les plus puissantes sont frappées, véritable royaume militaire à la technologie redoutable, ils sont le dernier bastion avant les Confins du Monde."
     },
     "confins": {
       "name": "Confins",
       "icon": "skull",
       "top": "71.8%",
       "left": "79.7%",
-      "lore": "Le néant corrupteur où la réalité s'effrite lentement dans l'oubli. Un lieu de non-existence."
+      "lore": "Le néant corrupteur où la réalité s'effrite lentement dans l'oubli. Un lieu de non-existence, perdu entre l'espace et le temps, un endroit où la réalité n'a pas sa place. Personne ne sait ce qui s'y trouve vraiment, parce que personne n'en ait jamais revenu."
     }
   },
   "tales": [
