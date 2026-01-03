@@ -2,7 +2,7 @@
   "ages": [
     {
       "id": "dawn",
-      "title": "L'Age des Héros (-500 à 0)",
+      "title": "L'Age des Héros (l'An -500 à 0)",
       "game": "Hero's Dawn",
       "color": "amber",
       "icon": "sun",
@@ -18,7 +18,7 @@
     },
     {
       "id": "flame",
-      "title": "Le Brasier",
+      "title": "Le Brasier (l'An 100)",
       "game": "Phoenix Flames",
       "color": "red",
       "icon": "flame",
@@ -26,7 +26,7 @@
     },
     {
       "id": "resonance",
-      "title": "La Résonance",
+      "title": "La Résonance (l'An 116)",
       "game": "Two of Us",
       "color": "indigo",
       "icon": "sparkles",
