@@ -1,0 +1,215 @@
+{
+  "ages": [
+    {
+      "id": "dawn",
+      "title": "L'Aube",
+      "game": "Hero's Dawn",
+      "color": "amber",
+      "icon": "sun",
+      "desc": "Découverte du Flux éthéré et fondation de Blanc-Port. Les premiers explorateurs tracent les frontières du monde connu."
+    },
+    {
+      "id": "flame",
+      "title": "Le Brasier",
+      "game": "Phoenix Flames",
+      "color": "red",
+      "icon": "flame",
+      "desc": "L'heure de la prophétie. Les royaumes sombrent dans le chaos tandis que la vérité se cherche dans les cendres. Le Phoenix renaît."
+    },
+    {
+      "id": "resonance",
+      "title": "La Résonance",
+      "game": "Two of Us",
+      "color": "indigo",
+      "icon": "sparkles",
+      "desc": "L'Unisson de Rose et Ezra. Un voyage pour stabiliser la réalité fracturée avant le crépuscule total. Les cendres du Phoenix retombent sur le monde."
+    }
+  ],
+  "biomes": {
+    "blanc-port": {
+      "name": "Blanc-Port",
+      "icon": "anchor",
+      "top": "25%",
+      "left": "20%",
+      "lore": "Une cité au bord de mer, bâtie par des pêcheurs et des marchands. Jadis prospère, elle a été laissé pour compte après la Fracture."
+    },
+    "champs-dor": {
+      "name": "Champs-d'Or",
+      "icon": "wheat",
+      "top": "22.5%",
+      "left": "44%",
+      "lore": "Plaines céréalières baignées d'un soleil éternel. On y forgeait autrefois les outils agricoles les plus parfaits de Nyr. Veritable grenier du monde, les agriculteurs des Champs-d'Or sont réputés pour leur savoir-faire et leur hospitalité."
+    },
+    "cents-couteaux": {
+      "name": "Cents Couteaux",
+      "icon": "trees",
+      "top": "51.2%",
+      "left": "32.5%",
+      "lore": "Jungle d'acier où la sève s'est transformée en métal après la Fracture. Chaque feuille peut devenir une arme mortelle."
+    },
+    "pic-jumeaux": {
+      "name": "Pic Jumeaux",
+      "icon": "mountain",
+      "top": "80%",
+      "left": "32.5%",
+      "lore": "Montagnes battues par les vents d'éther, abritant les derniers nains de la lignée de Khor et des mines de cristal pur."
+    },
+    "arbre-monde": {
+      "name": "Arbre-Monde",
+      "icon": "sprout",
+      "top": "50%",
+      "left": "60.6%",
+      "lore": "L'axe central de Nyr, canalisant la magie brute (Flux) vers le reste du monde. C'est le cœur battant de la réalité."
+    },
+    "royaume-khor": {
+      "name": "Royaume Khor",
+      "icon": "flame",
+      "top": "28.7%",
+      "left": "79%",
+      "lore": "Domaine volcanique où bat le cœur du Grand Forgeron. L'endroit où les armes les plus puissantes sont frappées."
+    },
+    "confins": {
+      "name": "Confins",
+      "icon": "skull",
+      "top": "71.8%",
+      "left": "79.7%",
+      "lore": "Le néant corrupteur où la réalité s'effrite lentement dans l'oubli. Un lieu de non-existence."
+    }
+  },
+  "tales": [
+    {
+      "id": "forgeron",
+      "title": "Le Premier Forgeron",
+      "era": "Ère de l'Éveil",
+      "icon": "book-marked",
+      "color": "amber",
+      "text": "Au commencement, Nyr n'était que poussière froide. Puis vint Khor, le Premier. D'un coup de marteau sur l'enclume du destin, il forgea le soleil et les étoiles. Mais son œuvre ne fut complète que lorsqu'il planta la graine de l'Arbre-Monde, liant la matière au Flux éternel."
+    },
+    {
+      "id": "ombre-port",
+      "title": "L'Ombre sur Blanc-Port",
+      "era": "Ère des Cendres",
+      "icon": "book-open",
+      "color": "indigo",
+      "text": "Niffl raconte que l'Oubli ne frappe pas par hasard. Il cherche les cœurs isolés. Quand Blanc-Port cessa de chanter, les ombres grimpèrent aux murs d'argent. C'est ce jour-là que le Grand Héros disparut, emportant avec lui le secret des étoiles."
+    },
+    {
+      "id": "unisson",
+      "title": "Le Chant de l'Unisson",
+      "era": "Ère de la Résonance",
+      "icon": "scroll",
+      "color": "purple",
+      "text": "Rose l'a écrit : seul le lien peut briser l'Oubli. Quand deux âmes partagent une même fréquence, elles créent un éclat capable de repousser le néant. Ezra fut le premier à comprendre, et sa résonance avec sa sœur changea l'histoire de Nyr."
+    }
+  ],
+  "bestiary": [
+    {
+      "id": "ombre",
+      "name": "Ombre de l'Oubli",
+      "type": "Spectre",
+      "zone": "Confins",
+      "icon": "skull",
+      "color": "text-amber-500",
+      "desc": "Un spectre sans forme, résidu de mémoires effacées.",
+      "part": "Invisible dans le noir total.",
+      "hist": "Anciennement des humains ayant perdu leur identité dans le Flux."
+    },
+    {
+      "id": "jaguar",
+      "name": "Jaguar d'Acier",
+      "type": "Faune",
+      "zone": "Cents Couteaux",
+      "icon": "paw-print",
+      "color": "text-emerald-500",
+      "desc": "Félin dont la fourrure est composée de fines lames métalliques.",
+      "part": "Ses griffes ignorent les armures magiques.",
+      "hist": "Fruit de la mutation de la sève de fer sur la faune locale."
+    },
+    {
+      "id": "golem",
+      "name": "Golem de Cristal",
+      "type": "Golem",
+      "zone": "Pic Jumeaux",
+      "icon": "gem",
+      "color": "text-blue-500",
+      "desc": "Massif colosse de quartz pur animé par des runes.",
+      "part": "Absorbe la magie de ses adversaires.",
+      "hist": "Gardiens millénaires construits par les nains."
+    },
+    {
+      "id": "esprit",
+      "name": "Esprit du Flux",
+      "type": "Spectre",
+      "zone": "Arbre-Monde",
+      "icon": "zap",
+      "color": "text-purple-500",
+      "desc": "Nuage de pure énergie magique doué de conscience.",
+      "part": "Se dématérialise à volonté.",
+      "hist": "Gardien du nexus vital de Nyr."
+    }
+  ],
+  "legends": [
+    {
+      "id": "ezra",
+      "name": "Ezra",
+      "title": "Le Bouclier de Nyr",
+      "icon": "user",
+      "color": "amber",
+      "lore": "Porteur de l'armure de son père, il protège Rose avec une dévotion absolue. Il est l'ancre physique du duo.",
+      "spec": "Défense absolue / Force brute"
+    },
+    {
+      "id": "rose",
+      "name": "Rose",
+      "title": "L'Écho de l'Éther",
+      "icon": "sparkles",
+      "color": "indigo",
+      "lore": "Gardienne des chants anciens, elle manipule le Flux pour altérer la réalité et soigner les plaies du monde.",
+      "spec": "Magie d'Unisson / Vision éthérée"
+    },
+    {
+      "id": "phoenix",
+      "name": "Phoenix",
+      "title": "L'Entité Solaire",
+      "icon": "flame",
+      "color": "red",
+      "lore": "Créature mythique disparue pendant des siècles. Son retour signale la renaissance ou l'apocalypse finale.",
+      "spec": "Feu sacré / Renaissance"
+    },
+    {
+      "id": "khor",
+      "name": "Khor",
+      "title": "Le Premier Forgeron",
+      "icon": "hammer",
+      "color": "slate",
+      "lore": "Le forgeron originel. On dit qu'il attend celui qui sera digne de forger le nouvel âge de Nyr.",
+      "spec": "Création primordiale / Savoir ancien"
+    }
+  ],
+  "folklore": [
+    {
+      "id": "etincelle",
+      "name": "Fête de l'Étincelle",
+      "icon": "sun",
+      "color": "amber",
+      "desc": "Célébration du Premier Feu Créateur.",
+      "details": "Une nuit où tout Blanc-Port allume des lanternes d'ambre pour guider les âmes vers le refuge."
+    },
+    {
+      "id": "etoiles",
+      "name": "Nuit des Étoiles",
+      "icon": "moon",
+      "color": "indigo",
+      "desc": "Veillée pour les Âmes de la Fracture.",
+      "details": "Un silence total est imposé à travers le monde pour écouter les vibrations célestes et réfléchir à l'Oubli."
+    },
+    {
+      "id": "rite",
+      "name": "Le Rite d'Unisson",
+      "icon": "zap",
+      "color": "purple",
+      "desc": "Fusion des Flux entre deux Aura-liés.",
+      "details": "Deux alliés mélangent leurs larmes dans un calice de cristal. C'est la base de la mécanique de lien de Two of Us."
+    }
+  ]
+}
